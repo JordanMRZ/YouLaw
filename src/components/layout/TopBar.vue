@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 
 const props = defineProps({
+  userName: { type: String, default: 'Docente' },
   showLives: { type: Boolean, default: false },
   lives: { type: Number, default: 3 },
   maxLives: { type: Number, default: 3 },
@@ -21,7 +22,7 @@ const lockLabel = computed(() => {
 
 <template>
   <header class="topbar">
-    <div><p class="eyebrow">MARTES, 7 DE SEPTIEMBRE</p><h1>Hola, Maria Isabel <span class="wave">✋</span></h1><p class="intro">Un pequeño paso cada día te acerca a hablar con confianza.</p></div>
+    <div><p class="eyebrow">YOULAW</p><h1>Hola, {{ userName }} <span class="wave">✋</span></h1><p class="intro">Un pequeño paso cada día te acerca a hablar con confianza.</p></div>
     <div class="top-actions">
       <button class="icon-button" type="button" aria-label="Notificaciones">♢<span class="notification-dot"></span></button>
       <div v-if="showLives" class="lives-pill" :class="{ shake: lifeShake, locked: isLocked }">

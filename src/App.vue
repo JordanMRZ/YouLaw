@@ -188,7 +188,7 @@ watch(lessonSummary, (summary) => {
   <div v-else class="app-shell" :class="{ 'dark-mode': isDarkMode }">
     <Sidebar :active-section="activeSection" :navigation="navigation" :user="user" @navigate="navigate" @settings="showSettings = true" @logout="handleLogout" />
     <main class="main-content" :class="{ 'main-content--didactic': activeSection === 'Didactico' }">
-      <TopBar v-if="activeSection !== 'Didactico'" :show-lives="diagnosticReady" :lives="lives" :max-lives="maxLives" :life-shake="lifeShake" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" />
+      <TopBar v-if="activeSection !== 'Didactico'" :user-name="user?.name" :show-lives="diagnosticReady" :lives="lives" :max-lives="maxLives" :life-shake="lifeShake" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" />
       <DidacticView v-if="activeSection === 'Didactico'" />
       <InitialAssessmentView v-else-if="!diagnosticReady" :on-start-diagnostic="startLevelCheck" @reset="resetAllProgress" />
       <DashboardView v-else-if="activeSection === 'Inicio'" :lessons="learningLessons" :total-xp="totalXp" :diagnostic-completed="diagnosticReady" :english-level="englishLevel" :diagnostic-score="diagnosticScore" :lives="lives" :max-lives="maxLives" @select-lesson="openDashboardLesson" @show-lessons="navigate('Lecciones')" @start-diagnostic="startLevelCheck" @start-learning="scrollToLearningPath" @reassess="startLevelCheck" />

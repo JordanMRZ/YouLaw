@@ -3,7 +3,9 @@ import InteractiveGameHost from '../components/interactive/InteractiveGameHost.v
 </script>
 
 <template>
-  <section class="didactic-view" aria-label="Aprendizaje didáctico interactivo">
-    <InteractiveGameHost />
+  <section class="didactic-view" aria-label="Módulo didáctico interactivo">
+    <div class="didactic-game-panel">
+      <InteractiveGameHost />
+    </div>
   </section>
 </template>
