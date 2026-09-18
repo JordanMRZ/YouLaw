@@ -1,6 +1,7 @@
 {
   "name": "youlaw",
   "version": "0.0.0",
+  "description": "YouLaw — aprendizaje de inglés jurídico (Vue + módulo didáctico 3D)",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,11 +10,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/drei": "^10.0.6",
+    "@react-three/fiber": "^9.1.2",
+    "@react-three/rapier": "^2.2.0",
     "firebase": "^12.18.0",
-    "vue": "^3.5.40"
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "^0.170.0",
+    "vue": "^3.5.40",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@types/three": "^0.170.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "~5.9.3",
     "vite": "^8.1.5",
     "vite-plugin-vue-devtools": "^8.1.5"
   },

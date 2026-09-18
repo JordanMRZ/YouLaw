@@ -1,30 +1,12 @@
-import { demoUsers } from '../data/mockUsers'
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { auth, db } from './firebase'
 
-const SESSION_KEY = 'youlaw_auth_session'
-const REGISTERED_USERS_KEY = 'youlaw_mock_registered_users'
+/** Roles de ATAV con acceso a YouLaw (profesores). */
+const ALLOWED_ROLES = new Set(['Docente'])
 
-function readRegisteredUsers() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(REGISTERED_USERS_KEY) || '[]')
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
-function writeRegisteredUsers(users) {
-  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users))
-}
-
-function allUsers() {
-  const registered = readRegisteredUsers()
-  const demoIds = new Set(demoUsers.map((user) => user.id))
-  const extra = registered.filter((user) => !demoIds.has(user.id))
-  return [...demoUsers, ...extra]
-}
-
-function normalizeEmail(email) {
-  return String(email || '').trim().toLowerCase()
+export function cedulaToAuthEmail(cedula) {
+  return `${cedula}@atav.com`
 }
 
 function buildInitials(name) {
@@ -37,85 +19,104 @@ function buildInitials(name) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
 }
 
-export function getSession() {
-  try {
-    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null')
-    if (!session?.userId) return null
-    const user = allUsers().find((entry) => entry.id === session.userId)
-    if (!user) {
-      localStorage.removeItem(SESSION_KEY)
-      return null
-    }
+function cedulaFromFirebaseUser(firebaseUser) {
+  const email = firebaseUser?.email || ''
+  const match = email.match(/^(\d+)@atav\.com$/i)
+  return match ? match[1] : null
+}
+
+async function loadSessionForCedula(cedula) {
+  const snap = await getDoc(doc(db, 'usuarios', cedula))
+  if (!snap.exists()) {
+    return { ok: false, error: 'Usuario no encontrado en ATAV.' }
+  }
+
+  const data = snap.data()
+  const rol = data.rol
+
+  if (!ALLOWED_ROLES.has(rol)) {
     return {
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      initials: user.initials || buildInitials(user.name),
+      ok: false,
+      error: 'YouLaw está disponible solo para docentes. Usa tu cuenta de ATAV con rol Docente.',
     }
+  }
+
+  if (data.requiereCambioPassword === true) {
+    return {
+      ok: false,
+      error: 'Debes cambiar tu contraseña en ATAV antes de continuar.',
+    }
+  }
+
+  const name = data.nombre || 'Usuario'
+
+  return {
+    ok: true,
+    session: {
+      userId: cedula,
+      uid: auth.currentUser?.uid ?? null,
+      cedula,
+      email: data.correo || cedulaToAuthEmail(cedula),
+      name,
+      role: rol,
+      initials: buildInitials(name),
+    },
+  }
+}
+
+export function subscribeAuth(onSession) {
+  return onAuthStateChanged(auth, async (firebaseUser) => {
+    if (!firebaseUser) {
+      onSession(null)
+      return
+    }
+
+    const cedula = cedulaFromFirebaseUser(firebaseUser)
+    if (!cedula) {
+      await signOut(auth)
+      onSession(null)
+      return
+    }
+
+    try {
+      const result = await loadSessionForCedula(cedula)
+      if (!result.ok) {
+        await signOut(auth)
+        onSession(null)
+        return
+      }
+      onSession(result.session)
+    } catch {
+      await signOut(auth)
+      onSession(null)
+    }
+  })
+}
+
+export async function loginWithCedula(cedula, password) {
+  const cedulaLimpia = String(cedula || '').trim()
+
+  if (!cedulaLimpia || !password) {
+    return { ok: false, error: 'Debes completar cédula y contraseña.' }
+  }
+
+  if (!/^\d+$/.test(cedulaLimpia)) {
+    return { ok: false, error: 'La cédula debe contener solo números.' }
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, cedulaToAuthEmail(cedulaLimpia), password)
+    const result = await loadSessionForCedula(cedulaLimpia)
+    if (!result.ok) {
+      await signOut(auth)
+      return result
+    }
+    return result
   } catch {
-    return null
+    return { ok: false, error: 'Cédula o contraseña incorrecta.' }
   }
 }
 
-export function login(email, password) {
-  const normalizedEmail = normalizeEmail(email)
-  const user = allUsers().find((entry) => normalizeEmail(entry.email) === normalizedEmail)
-  if (!user || user.password !== password) {
-    return { ok: false, error: 'Correo o contraseña incorrectos.' }
-  }
-  const session = {
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    initials: user.initials || buildInitials(user.name),
-  }
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-  return { ok: true, session }
-}
-
-export function register({ name, email, password, role }) {
-  const trimmedName = String(name || '').trim()
-  const normalizedEmail = normalizeEmail(email)
-  const trimmedPassword = String(password || '')
-
-  if (!trimmedName || !normalizedEmail || trimmedPassword.length < 6) {
-    return { ok: false, error: 'Completa nombre, correo válido y contraseña (mín. 6 caracteres).' }
-  }
-
-  if (allUsers().some((entry) => normalizeEmail(entry.email) === normalizedEmail)) {
-    return { ok: false, error: 'Ya existe una cuenta con ese correo.' }
-  }
-
-  const user = {
-    id: `user-${Date.now()}`,
-    email: normalizedEmail,
-    password: trimmedPassword,
-    name: trimmedName,
-    role: role || 'Estudiante',
-    initials: buildInitials(trimmedName),
-  }
-
-  const registered = readRegisteredUsers()
-  registered.push(user)
-  writeRegisteredUsers(registered)
-
-  const session = {
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    initials: user.initials,
-  }
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-  return { ok: true, session }
-}
-
-export function logout() {
-  localStorage.removeItem(SESSION_KEY)
-}
-
-export function listDemoAccounts() {
-  return demoUsers.map(({ email, password, name, role }) => ({ email, password, name, role }))
+export async function logout() {
+  await signOut(auth)
 }

@@ -1,27 +1,30 @@
 # YouLaw
 
-Aplicación de aprendizaje de inglés jurídico (Vue 3 + Vite). Incluye evaluación de nivel, ruta por CEFR (A1–C1) y lecciones con ejercicios. El progreso y la autenticación de demostración se guardan en `localStorage`.
+Repositorio: **[github.com/JordanMRZ/YouLaw](https://github.com/JordanMRZ/YouLaw)**
 
-## Cuentas de prueba
+Aplicación **YouLaw** — aprendizaje de inglés jurídico (Vue 3 + Vite). Los docentes entran con la **misma cédula y contraseña que en ATAV** (Firebase `atav-48646`, colección `usuarios`).
 
-| Correo | Contraseña | Perfil |
-|--------|------------|--------|
-| `maria@youlaw.test` | `demo123` | Profesora |
-| `jordan@youlaw.test` | `demo123` | Estudiante |
+## Configuración
 
-También puedes crear una cuenta desde la pantalla de registro (datos locales).
-
-## Desarrollo
+Copia `.env.example` a `.env` y completa las variables `VITE_FIREBASE_*` (misma config web que ATAV).
 
 ```sh
 npm install
 npm run dev
 ```
 
+## Acceso
+
+- Cédula (solo números) + contraseña.
+- Auth: `{cedula}@atav.com` en Firebase Authentication.
+- Solo usuarios con rol **Docente** en Firestore.
+
+El primer registro de contraseña se hace en ATAV, no en YouLaw.
+
+## Didáctico (juego 3D)
+
+El juego **You Law Game** vive en `src/interactive-game/` y se abre desde el sidebar (**Didactico**), con el menú lateral siempre visible. El código fuente anterior estaba en `JuegoDerecho` / repo YouLawGame; el desarrollo activo es solo este repositorio.
+
 ```sh
 npm run build
 ```
-
-## IDE
-
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar)

@@ -1,6 +1,7 @@
 export const navigation = [
   { label: 'Inicio', icon: '⌂' },
   { label: 'Lecciones', icon: '✦' },
+  { label: 'Didactico', icon: '▶' },
   { label: 'Logros', icon: '◆' },
 ]
 

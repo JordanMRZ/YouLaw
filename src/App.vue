@@ -12,13 +12,14 @@ import SettingsModal from './components/layout/SettingsModal.vue'
 import DashboardView from './views/DashboardView.vue'
 import LessonsView from './views/LessonsView.vue'
 import AchievementsView from './views/AchievementsView.vue'
+import DidacticView from './views/DidacticView.vue'
 import InitialAssessmentView from './views/InitialAssessmentView.vue'
 import LoginView from './views/LoginView.vue'
 import { useDiagnosticAssessment } from './composables/useDiagnosticAssessment'
 import { useAuth } from './composables/useAuth'
 import { clearAllLocalData } from './services/localStorage'
 
-const { isAuthenticated, user, logout } = useAuth()
+const { authReady, isAuthenticated, user, logout } = useAuth()
 
 const activeSection = ref('Inicio')
 const currentFlow = ref('dashboard')
@@ -138,8 +139,8 @@ function resetAllProgress() {
   window.location.reload()
 }
 
-function handleLogout() {
-  logout()
+async function handleLogout() {
+  await logout()
   showSettings.value = false
   activeSection.value = 'Inicio'
   currentFlow.value = 'dashboard'
@@ -182,15 +183,17 @@ watch(lessonSummary, (summary) => {
 </script>
 
 <template>
-  <LoginView v-if="!isAuthenticated" />
+  <div v-if="!authReady" class="auth-boot" aria-live="polite">Cargando sesión…</div>
+  <LoginView v-else-if="!isAuthenticated" />
   <div v-else class="app-shell" :class="{ 'dark-mode': isDarkMode }">
     <Sidebar :active-section="activeSection" :navigation="navigation" :user="user" @navigate="navigate" @settings="showSettings = true" @logout="handleLogout" />
-    <main class="main-content">
-      <TopBar :show-lives="diagnosticReady" :lives="lives" :max-lives="maxLives" :life-shake="lifeShake" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" />
-      <InitialAssessmentView v-if="!diagnosticReady" :on-start-diagnostic="startLevelCheck" @reset="resetAllProgress" />
+    <main class="main-content" :class="{ 'main-content--didactic': activeSection === 'Didactico' }">
+      <TopBar v-if="activeSection !== 'Didactico'" :show-lives="diagnosticReady" :lives="lives" :max-lives="maxLives" :life-shake="lifeShake" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" />
+      <DidacticView v-if="activeSection === 'Didactico'" />
+      <InitialAssessmentView v-else-if="!diagnosticReady" :on-start-diagnostic="startLevelCheck" @reset="resetAllProgress" />
       <DashboardView v-else-if="activeSection === 'Inicio'" :lessons="learningLessons" :total-xp="totalXp" :diagnostic-completed="diagnosticReady" :english-level="englishLevel" :diagnostic-score="diagnosticScore" :lives="lives" :max-lives="maxLives" @select-lesson="openDashboardLesson" @show-lessons="navigate('Lecciones')" @start-diagnostic="startLevelCheck" @start-learning="scrollToLearningPath" @reassess="startLevelCheck" />
       <LessonsView v-else-if="activeSection === 'Lecciones'" :lessons="learningLessons" @select-lesson="openLibraryLesson" />
-      <AchievementsView v-else />
+      <AchievementsView v-else-if="activeSection === 'Logros'" />
     </main>
     <LessonPreparation v-if="selectedLesson && currentFlow === 'lessonPreparation'" :lesson="selectedLesson" @begin-lesson="startLesson(); currentFlow = 'lesson'" @close="closeFlow" />
     <DiagnosticAssessment v-else-if="currentFlow === 'diagnostic' || currentFlow === 'diagnosticResult'" :question="currentQuestion" :question-number="questionNumber" :question-count="20" :progress="progress" :level-label="levelLabel" :current-level="currentLevel" :selected-answer="diagnosticSelectedAnswer" :answer-status="diagnosticAnswerStatus" :is-complete="isComplete" :correct-answers="correctAnswers" :category-scores="categoryScores" @answer="answerDiagnostic" @next="nextDiagnostic" @start="beginDiagnostic" @continue="continueFromDiagnostic" @close="closeFlow" />
