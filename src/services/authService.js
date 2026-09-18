@@ -1,9 +1,13 @@
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
-
-/** Roles de ATAV con acceso a YouLaw (profesores). */
-const ALLOWED_ROLES = new Set(['Docente'])
+import {
+  canUseGameEditor,
+  isYouLawAllowedRole,
+  normalizeAtavRole,
+  youLawAccessDeniedMessage,
+} from './authRoles'
+import { setActiveProgressUser } from './progressScope'
 
 export function cedulaToAuthEmail(cedula) {
   return `${cedula}@atav.com`
@@ -32,12 +36,12 @@ async function loadSessionForCedula(cedula) {
   }
 
   const data = snap.data()
-  const rol = data.rol
+  const rol = normalizeAtavRole(data.rol)
 
-  if (!ALLOWED_ROLES.has(rol)) {
+  if (!isYouLawAllowedRole(rol)) {
     return {
       ok: false,
-      error: 'YouLaw está disponible solo para docentes. Usa tu cuenta de ATAV con rol Docente.',
+      error: youLawAccessDeniedMessage(),
     }
   }
 
@@ -60,13 +64,19 @@ async function loadSessionForCedula(cedula) {
       name,
       role: rol,
       initials: buildInitials(name),
+      canUseGameEditor: canUseGameEditor(rol),
     },
   }
+}
+
+function applySession(session) {
+  setActiveProgressUser(session?.userId ?? null)
 }
 
 export function subscribeAuth(onSession) {
   return onAuthStateChanged(auth, async (firebaseUser) => {
     if (!firebaseUser) {
+      applySession(null)
       onSession(null)
       return
     }
@@ -74,6 +84,7 @@ export function subscribeAuth(onSession) {
     const cedula = cedulaFromFirebaseUser(firebaseUser)
     if (!cedula) {
       await signOut(auth)
+      applySession(null)
       onSession(null)
       return
     }
@@ -82,12 +93,15 @@ export function subscribeAuth(onSession) {
       const result = await loadSessionForCedula(cedula)
       if (!result.ok) {
         await signOut(auth)
+        applySession(null)
         onSession(null)
         return
       }
+      applySession(result.session)
       onSession(result.session)
     } catch {
       await signOut(auth)
+      applySession(null)
       onSession(null)
     }
   })
@@ -109,8 +123,10 @@ export async function loginWithCedula(cedula, password) {
     const result = await loadSessionForCedula(cedulaLimpia)
     if (!result.ok) {
       await signOut(auth)
+      applySession(null)
       return result
     }
+    applySession(result.session)
     return result
   } catch {
     return { ok: false, error: 'Cédula o contraseña incorrecta.' }
@@ -119,4 +135,5 @@ export async function loginWithCedula(cedula, password) {
 
 export async function logout() {
   await signOut(auth)
+  applySession(null)
 }

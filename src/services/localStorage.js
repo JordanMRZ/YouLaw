@@ -5,7 +5,6 @@ export {
   defaultProgress,
   getDiagnosticProgress,
   getProgress,
-  progressKey,
   saveDiagnosticProgress,
   saveProgress,
 } from './localStorageService'

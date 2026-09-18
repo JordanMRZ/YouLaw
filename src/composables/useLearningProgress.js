@@ -1,16 +1,16 @@
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { exercises, lessonExercisesById, lessonsByLevel } from '../data/mockData'
 import { getProgress, saveProgress } from '../services/localStorage'
+import { activeProgressUserId } from '../services/progressScope'
 
 const levelRank = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 }
 const lifeLockDurationMs = 2 * 60 * 1000
 
 export function useLearningProgress() {
-  const savedProgress = getProgress()
-  const totalXp = ref(Number(savedProgress.xp || 340))
-  const learningLevel = ref(savedProgress.englishLevel || 'A1')
-  const lives = ref(Number(savedProgress.lives || 3))
-  const lockUntil = ref(savedProgress.lockUntil || null)
+  const totalXp = ref(340)
+  const learningLevel = ref('A1')
+  const lives = ref(3)
+  const lockUntil = ref(null)
   const lockRemainingSeconds = ref(0)
   const selectedLesson = ref(null)
   const selectedAnswer = ref(null)
@@ -18,7 +18,7 @@ export function useLearningProgress() {
   const exerciseIndex = ref(0)
   const exerciseOrder = ref([])
   const wrongReviewQueue = ref([])
-  const completedLessons = ref(savedProgress.completedLessons || [])
+  const completedLessons = ref([])
   const lessonSummary = ref(null)
   const activeExercises = ref([])
   let lastCorrectOptionIndex = -1
@@ -54,6 +54,20 @@ export function useLearningProgress() {
   }
 
   let lockTimer = null
+
+  function loadFromStorage() {
+    const savedProgress = getProgress()
+    totalXp.value = Number(savedProgress.xp ?? 340)
+    learningLevel.value = savedProgress.englishLevel || 'A1'
+    lives.value = Number(savedProgress.lives ?? 3)
+    lockUntil.value = savedProgress.lockUntil || null
+    completedLessons.value = savedProgress.completedLessons || []
+    syncLockState()
+  }
+
+  watch(activeProgressUserId, (userId) => {
+    if (userId) loadFromStorage()
+  }, { immediate: true })
 
   onMounted(() => {
     syncLockState()

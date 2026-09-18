@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from 'vue'
+import AppIcon from '../icons/AppIcon.vue'
+import { FireIcon, FavouriteIcon, Notification01Icon } from '../../icons/navigationIcons.js'
 
 const props = defineProps({
   userName: { type: String, default: 'Docente' },
@@ -24,15 +26,15 @@ const lockLabel = computed(() => {
   <header class="topbar">
     <div><p class="eyebrow">YOULAW</p><h1>Hola, {{ userName }} <span class="wave">✋</span></h1><p class="intro">Un pequeño paso cada día te acerca a hablar con confianza.</p></div>
     <div class="top-actions">
-      <button class="icon-button" type="button" aria-label="Notificaciones">♢<span class="notification-dot"></span></button>
+      <button class="icon-button" type="button" aria-label="Notificaciones"><AppIcon :icon="Notification01Icon" :size="22" /><span class="notification-dot"></span></button>
       <div v-if="showLives" class="lives-pill" :class="{ shake: lifeShake, locked: isLocked }">
         <span class="lives-label">{{ isLocked ? 'Bloqueada' : 'Vidas' }}</span>
         <div class="lives-hearts" aria-label="Vidas disponibles">
-          <span v-for="(hasLife, index) in hearts" :key="index" class="life-heart" :class="{ lost: !hasLife }">♥</span>
+          <span v-for="(hasLife, index) in hearts" :key="index" class="life-heart" :class="{ lost: !hasLife }"><AppIcon :icon="FavouriteIcon" :size="16" /></span>
         </div>
         <span v-if="isLocked" class="lock-timer">{{ lockLabel }}</span>
       </div>
-      <div class="streak-pill"><span>♨</span><strong>5</strong><small>días</small></div>
+      <div class="streak-pill"><AppIcon :icon="FireIcon" :size="18" /><strong>5</strong><small>días</small></div>
     </div>
   </header>
 </template>

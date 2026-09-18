@@ -46,6 +46,9 @@ interface GameState {
   coachLine: string | null
   burst: { at: Vec3; kind: 'correct' | 'wrong' | 'checkpoint' | 'goal' | 'coin' } | null
   editorReturn: boolean
+  canOpenEditor: boolean
+  reloadSaveFromStorage: () => void
+  setCanOpenEditor: (open: boolean) => void
   startLevel: (id: number, opts?: { fromEditor?: boolean }) => void
   backToHub: () => void
   setPhase: (phase: GamePhase) => void
@@ -119,6 +122,24 @@ export const useGameStore = create<GameState>((set, get) => ({
   coachLine: null,
   burst: null,
   editorReturn: false,
+  canOpenEditor: false,
+
+  reloadSaveFromStorage: () => {
+    const save = loadSave()
+    audio.configure(save.settings)
+    set({
+      save,
+      selectedLevel: Math.min(save.unlockedLevel, LEVEL_COUNT),
+      phase: 'hub',
+      editorReturn: false,
+      shopOpen: false,
+      settingsOpen: false,
+      results: null,
+      mistake: null,
+    })
+  },
+
+  setCanOpenEditor: (open) => set({ canOpenEditor: open }),
 
   startLevel: (id, opts) => {
     const fromEditor = opts?.fromEditor ?? get().editorReturn

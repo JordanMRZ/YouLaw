@@ -1,5 +1,6 @@
-const progressKey = 'youlaw_progress'
-const legacyKeys = ['youlaw-learning-progress']
+import { getActiveLessonProgressKey } from './progressScope'
+
+const legacyKeys = ['youlaw-learning-progress', 'youlaw_progress']
 
 const defaultProgress = {
   schemaVersion: 4,
@@ -18,9 +19,15 @@ const defaultProgress = {
   completedLessons: [],
 }
 
+function resolveProgressKey() {
+  return getActiveLessonProgressKey()
+}
+
 function readRawProgress() {
+  const key = resolveProgressKey()
+  if (!key) return {}
   try {
-    return JSON.parse(localStorage.getItem(progressKey) || '{}')
+    return JSON.parse(localStorage.getItem(key) || '{}')
   } catch {
     return {}
   }
@@ -52,7 +59,9 @@ export function getProgress() {
 }
 
 export function saveProgress(progress) {
-  localStorage.setItem(progressKey, JSON.stringify({ ...getProgress(), schemaVersion: 4, ...progress }))
+  const key = resolveProgressKey()
+  if (!key) return
+  localStorage.setItem(key, JSON.stringify({ ...getProgress(), schemaVersion: 4, ...progress }))
 }
 
 export function getDiagnosticProgress() {
@@ -87,8 +96,9 @@ export function clearDiagnosticProgress() {
 }
 
 export function clearProgress() {
-  localStorage.removeItem(progressKey)
-  legacyKeys.forEach((key) => localStorage.removeItem(key))
+  const key = resolveProgressKey()
+  if (key) localStorage.removeItem(key)
+  legacyKeys.forEach((legacyKey) => localStorage.removeItem(legacyKey))
 }
 
 export function clearAllLocalData() {
@@ -96,4 +106,4 @@ export function clearAllLocalData() {
   sessionStorage.clear()
 }
 
-export { progressKey, defaultProgress }
+export { defaultProgress }

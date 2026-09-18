@@ -1,0 +1,197 @@
+/* YouLaw — layout responsive (sidebar + contenido + juego didáctico) */
+
+.app-huge-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+}
+
+.nav-label {
+  line-height: 1.2;
+}
+
+.life-heart {
+  display: inline-flex;
+  align-items: center;
+}
+
+.life-heart.lost {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.streak-pill .app-huge-icon {
+  color: var(--coral);
+}
+
+.brand-star,
+.help-spark {
+  display: inline-flex;
+  align-items: center;
+}
+
+.settings-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 24px 28px 40px;
+  }
+
+  .lesson-path {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .main-content.main-content--didactic {
+    padding: 8px 12px 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .app-shell > .sidebar {
+    width: 100%;
+    flex-direction: column;
+    padding: 12px 14px 10px;
+    border-right: 0;
+    border-bottom: 1px solid var(--card-line);
+  }
+
+  .brand-mark {
+    margin-bottom: 8px;
+  }
+
+  .main-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .nav-item {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .nav-label {
+    font-size: 10px;
+  }
+
+  .sidebar-bottom {
+    display: none;
+  }
+
+  .main-content {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 20px 16px 24px;
+    overflow-y: auto;
+  }
+
+  .main-content.main-content--didactic {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    padding: 6px 8px 8px;
+    overflow: hidden;
+  }
+
+  .didactic-view {
+    flex: 1;
+    min-height: min(72dvh, calc(100dvh - 118px));
+  }
+
+  .didactic-game-panel {
+    min-height: 280px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .top-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .hero-grid,
+  .lower-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-path,
+  .library-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .level-hero {
+    flex-direction: column;
+    padding: 24px 20px;
+  }
+
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-label {
+    font-size: 9px;
+  }
+
+  .lesson-path,
+  .library-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .didactic-view {
+    min-height: min(68dvh, calc(100dvh - 108px));
+  }
+
+  .lesson-modal,
+  .settings-modal {
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    width: auto;
+  }
+}

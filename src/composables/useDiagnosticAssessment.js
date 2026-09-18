@@ -1,6 +1,7 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { diagnosticQuestions, levelOrder } from '../data/diagnosticData'
 import { getDiagnosticProgress, saveDiagnosticProgress } from '../services/localStorage'
+import { activeProgressUserId } from '../services/progressScope'
 
 const questionLimit = 20
 
@@ -23,12 +24,25 @@ export function useDiagnosticAssessment() {
   const correctStreak = ref(0)
   const usedQuestionIds = ref([])
   const isComplete = ref(false)
-  const savedProgress = getDiagnosticProgress()
-  const diagnosticCompleted = ref(savedProgress.diagnosticCompleted)
-  const englishLevel = ref(savedProgress.englishLevel)
-  const diagnosticScore = ref(savedProgress.diagnosticScore)
-  const diagnosticDate = ref(savedProgress.diagnosticDate)
-  const diagnosticResults = ref(savedProgress.diagnosticResults)
+  const diagnosticCompleted = ref(false)
+  const englishLevel = ref(null)
+  const diagnosticScore = ref(0)
+  const diagnosticDate = ref(null)
+  const diagnosticResults = ref(null)
+
+  function loadFromStorage() {
+    const savedProgress = getDiagnosticProgress()
+    diagnosticCompleted.value = savedProgress.diagnosticCompleted
+    englishLevel.value = savedProgress.englishLevel
+    diagnosticScore.value = savedProgress.diagnosticScore
+    diagnosticDate.value = savedProgress.diagnosticDate
+    diagnosticResults.value = savedProgress.diagnosticResults
+  }
+
+  watch(activeProgressUserId, (userId) => {
+    if (userId) loadFromStorage()
+  }, { immediate: true })
+
   let advanceTimer = null
   let lastCorrectOptionIndex = -1
 

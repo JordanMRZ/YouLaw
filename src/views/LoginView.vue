@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useAuth } from '../composables/useAuth'
+import AppIcon from '../components/icons/AppIcon.vue'
+import { SparklesIcon } from '../icons/navigationIcons.js'
 
 const { login } = useAuth()
 
@@ -26,7 +28,7 @@ async function submit() {
   <div class="auth-page">
     <div class="auth-shell">
       <aside class="auth-brand-panel" aria-hidden="false">
-        <div class="brand-mark auth-brand"><span class="brand-star">✦</span><span>YouLaw<span class="brand-dot">.</span></span></div>
+        <div class="brand-mark auth-brand"><span class="brand-star"><AppIcon :icon="SparklesIcon" :size="24" /></span><span>YouLaw<span class="brand-dot">.</span></span></div>
         <h1>Inglés jurídico,<br /><em>a tu ritmo.</em></h1>
         <p>Accede con la misma cédula y contraseña que usas en ATAV.</p>
         <ul class="auth-features">

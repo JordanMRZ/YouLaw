@@ -16,6 +16,7 @@ export function useAuth() {
   async function login(cedula, password) {
     const result = await authService.loginWithCedula(cedula, password)
     if (result.ok) session.value = result.session
+    else session.value = null
     return result
   }
 

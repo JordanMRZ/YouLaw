@@ -7,6 +7,7 @@ import { GameSession } from './scenes/GameSession'
 import { HubWorld } from './scenes/HubWorld'
 import { useEditorStore } from './store/editorStore'
 import { useGameStore } from './store/gameStore'
+import { notifyGameCanvasReady } from './gameBoot'
 import { Overlay } from './ui/Overlay'
 
 export default function App() {
@@ -48,6 +49,7 @@ export default function App() {
               event.preventDefault()
               remountCanvas()
             })
+            notifyGameCanvasReady()
           }}
         >
           {inHub ? (

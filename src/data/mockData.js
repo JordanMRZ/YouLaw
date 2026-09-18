@@ -1,8 +1,8 @@
 export const navigation = [
-  { label: 'Inicio', icon: '⌂' },
-  { label: 'Lecciones', icon: '✦' },
-  { label: 'Didactico', icon: '▶' },
-  { label: 'Logros', icon: '◆' },
+  { label: 'Inicio' },
+  { label: 'Lecciones' },
+  { label: 'Didactico' },
+  { label: 'Logros' },
 ]
 
 function createLessons(level, titles) {

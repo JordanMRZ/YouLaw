@@ -1,7 +1,11 @@
 import { defaultCosmetics, starterOwned } from './shop'
 import type { Cosmetics, GlassesStyle, PackStyle, SaveAdapter, SaveData, Settings } from './types'
 
-const KEY = 'word-bridge-3d-save-v1'
+import { getActiveGameSaveKey } from '../../services/progressScope.js'
+
+function storageKey() {
+  return getActiveGameSaveKey()
+}
 
 export { defaultCosmetics } from './shop'
 
@@ -50,7 +54,9 @@ export function createDefaultSave(): SaveData {
 export const localStorageAdapter: SaveAdapter = {
   load() {
     try {
-      const raw = localStorage.getItem(KEY)
+      const key = storageKey()
+      if (!key) return null
+      const raw = localStorage.getItem(key)
       if (!raw) return null
       const parsed = JSON.parse(raw) as Partial<SaveData> & { cosmetics?: Partial<Cosmetics> }
       const base = createDefaultSave()
@@ -69,7 +75,9 @@ export const localStorageAdapter: SaveAdapter = {
     }
   },
   save(data) {
-    localStorage.setItem(KEY, JSON.stringify(data))
+    const key = storageKey()
+    if (!key) return
+    localStorage.setItem(key, JSON.stringify(data))
   },
 }
 

@@ -82,6 +82,7 @@ function HubChrome() {
   const meta = levelCatalog[selected - 1]
   const record = save.levels[String(selected)]
   const locked = selected > save.unlockedLevel
+  const showEditor = useGameStore((s) => s.canOpenEditor)
 
   return (
     <>
@@ -94,15 +95,17 @@ function HubChrome() {
         <div className="hub-actions">
           <span className="xp-chip">{save.wallet} 🪙</span>
           <span className="xp-chip xp">{save.xp} XP</span>
-          <button
-            type="button"
-            onClick={() => {
-              audio.unlock()
-              useEditorStore.getState().openEditor(selected)
-            }}
-          >
-            Editor
-          </button>
+          {showEditor && (
+            <button
+              type="button"
+              onClick={() => {
+                audio.unlock()
+                useEditorStore.getState().openEditor(selected)
+              }}
+            >
+              Editor
+            </button>
+          )}
           <button type="button" onClick={() => useGameStore.getState().setShopOpen(true)}>
             Tienda
           </button>
