@@ -34,11 +34,11 @@ export default function App() {
           key={canvasKey}
           shadows
           dpr={[1, 1.5]}
-          camera={{ position: [0, 6, 12], fov: 50, near: 0.1, far: 240 }}
+          camera={{ position: [0, 1.2, 13], fov: 50, near: 0.1, far: 280 }}
           gl={{ antialias: true, powerPreference: 'default', alpha: false, failIfMajorPerformanceCaveat: false }}
           onCreated={({ scene, gl }) => {
-            scene.background = new Color('#b8e0ef')
-            gl.setClearColor('#b8e0ef')
+            scene.background = new Color('#071018')
+            gl.setClearColor('#071018')
             const canvas = gl.domElement
             const width = Math.max(1, canvas.clientWidth)
             const height = Math.max(1, canvas.clientHeight)

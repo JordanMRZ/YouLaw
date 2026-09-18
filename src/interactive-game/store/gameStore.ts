@@ -1,6 +1,13 @@
 import { create } from 'zustand'
 import { audio } from '../audio/audioManager'
-import { getLevel, LEVEL_COUNT, unloadLevel } from '../data/levels'
+import {
+  firstLevelOfWorld,
+  isWorldLocked,
+  lastLevelOfWorld,
+  worldIndexForLevel,
+  type HubLayer,
+} from '../data/hubLayout'
+import { getLevel, LEVEL_COUNT, WORLD_COUNT, unloadLevel } from '../data/levels'
 import { itemById } from '../data/shop'
 import { loadSave, persistSave } from '../data/storage'
 import type { Cosmetics, GamePhase, RunResults, SaveData, Vec3 } from '../data/types'
@@ -11,6 +18,8 @@ import { computeResults } from '../game/scoring'
 interface GameState {
   phase: GamePhase
   selectedLevel: number
+  selectedWorld: number
+  hubLayer: HubLayer
   levelId: number
   sessionId: number
   lives: number
@@ -53,6 +62,11 @@ interface GameState {
   backToHub: () => void
   setPhase: (phase: GamePhase) => void
   setSelectedLevel: (id: number) => void
+  setSelectedWorld: (index: number) => void
+  setHubLayer: (layer: HubLayer) => void
+  cycleHubSelection: (dir: -1 | 1) => void
+  enterSelectedWorld: () => void
+  exitWorldToGalaxy: () => void
   tick: (dt: number) => void
   setPrompt: (prompt: string | null) => void
   showToast: (text: string) => void
@@ -93,6 +107,8 @@ function persist(save: SaveData) {
 export const useGameStore = create<GameState>((set, get) => ({
   phase: 'hub',
   selectedLevel: Math.min(initialSave.unlockedLevel, LEVEL_COUNT),
+  selectedWorld: worldIndexForLevel(Math.min(initialSave.unlockedLevel, LEVEL_COUNT)),
+  hubLayer: 'galaxy',
   levelId: 1,
   sessionId: 0,
   lives: 3,
@@ -130,6 +146,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       save,
       selectedLevel: Math.min(save.unlockedLevel, LEVEL_COUNT),
+      selectedWorld: worldIndexForLevel(Math.min(save.unlockedLevel, LEVEL_COUNT)),
+      hubLayer: 'galaxy',
       phase: 'hub',
       editorReturn: false,
       shopOpen: false,
@@ -182,8 +200,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   backToHub: () => {
     audio.stopSpeech()
     const toEditor = get().editorReturn
+    const levelId = get().levelId
     set({
       phase: toEditor ? 'editor' : 'hub',
+      hubLayer: toEditor ? get().hubLayer : 'world',
+      selectedLevel: levelId,
+      selectedWorld: worldIndexForLevel(levelId),
       editorReturn: toEditor,
       prompt: null,
       toast: null,
@@ -196,7 +218,41 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setPhase: (phase) => set({ phase }),
-  setSelectedLevel: (id) => set({ selectedLevel: id }),
+  setSelectedLevel: (id) => {
+    const next = Math.min(LEVEL_COUNT, Math.max(1, id))
+    set({ selectedLevel: next, selectedWorld: worldIndexForLevel(next) })
+  },
+  setSelectedWorld: (index) => {
+    const next = Math.min(WORLD_COUNT - 1, Math.max(0, index))
+    set({
+      selectedWorld: next,
+      selectedLevel: firstLevelOfWorld(next),
+    })
+  },
+  setHubLayer: (layer) => set({ hubLayer: layer }),
+  cycleHubSelection: (dir) => {
+    const { hubLayer, selectedWorld, selectedLevel } = get()
+    if (hubLayer === 'galaxy') {
+      get().setSelectedWorld(selectedWorld + dir)
+      return
+    }
+    const first = firstLevelOfWorld(selectedWorld)
+    const last = lastLevelOfWorld(selectedWorld)
+    const next = Math.min(last, Math.max(first, selectedLevel + dir))
+    set({ selectedLevel: next })
+  },
+  enterSelectedWorld: () => {
+    const { selectedWorld, selectedLevel, save } = get()
+    if (isWorldLocked(selectedWorld, save.unlockedLevel)) return
+    const first = firstLevelOfWorld(selectedWorld)
+    const lastLevel = lastLevelOfWorld(selectedWorld)
+    const inWorld = selectedLevel >= first && selectedLevel <= lastLevel
+    set({
+      hubLayer: 'world',
+      selectedLevel: inWorld && selectedLevel <= save.unlockedLevel ? selectedLevel : first,
+    })
+  },
+  exitWorldToGalaxy: () => set({ hubLayer: 'galaxy' }),
 
   tick: (dt) => {
     if (get().phase !== 'play' || get().mistake) return

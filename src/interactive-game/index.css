@@ -56,6 +56,9 @@ canvas {
 .hub-top,
 .hud-top,
 .hub-card,
+.hub-dock,
+.hub-nav,
+.hub-back,
 .modal,
 .prompt,
 .toast,
@@ -84,7 +87,8 @@ canvas {
 
 .hub-top h1,
 .modal h2,
-.hub-card h2 {
+.hub-card h2,
+.hub-dock h2 {
   margin: 0;
   letter-spacing: -0.03em;
 }
@@ -112,6 +116,10 @@ canvas {
 
 .hub-top {
   align-items: flex-start;
+}
+
+.hub-top--minimal {
+  justify-content: flex-end;
 }
 
 .hub-brand {
@@ -210,6 +218,72 @@ canvas {
   margin-top: 10px;
   padding: 11px 18px;
   font-size: 16px;
+}
+
+.hub-dock {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  width: min(420px, calc(100% - 120px));
+  padding: 14px 18px 12px;
+  border-radius: 22px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(18, 36, 52, 0.78), rgba(12, 22, 34, 0.82));
+  border: 1px solid rgba(255, 209, 102, 0.18);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.32);
+}
+
+.hub-dock h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.hub-dock .hub-sub,
+.hub-dock .stars,
+.hub-dock .muted {
+  margin: 4px 0;
+}
+
+.hub-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(12, 22, 34, 0.55);
+  color: #f4fbff;
+  font-size: 32px;
+  line-height: 1;
+  backdrop-filter: blur(12px);
+}
+
+.hub-nav:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.hub-nav--left {
+  left: 16px;
+}
+
+.hub-nav--right {
+  right: 16px;
+}
+
+.hub-back {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 22, 34, 0.55);
+  backdrop-filter: blur(12px);
 }
 
 .modal {
@@ -572,11 +646,23 @@ label {
     font-size: 18px;
   }
 
-  .hub-card {
+  .hub-card,
+  .hub-dock {
     width: min(360px, calc(100% - 24px));
     left: 12px;
     bottom: 12px;
     padding: 12px 14px;
+  }
+
+  .hub-dock {
+    left: 50%;
+    width: min(360px, calc(100% - 96px));
+  }
+
+  .hub-nav {
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
   }
 
   .hub-top,
@@ -608,16 +694,34 @@ label {
     font-size: 16px;
   }
 
-  .hub-card {
+  .hub-card,
+  .hub-dock {
     left: 8px;
     right: 8px;
     bottom: 8px;
     width: auto;
     max-width: none;
     border-radius: 16px;
+    transform: none;
   }
 
-  .hub-card h2 {
+  .hub-dock {
+    left: 8px;
+  }
+
+  .hub-nav {
+    top: auto;
+    bottom: 92px;
+    transform: none;
+  }
+
+  .hub-back {
+    top: 10px;
+    left: 10px;
+  }
+
+  .hub-card h2,
+  .hub-dock h2 {
     font-size: 17px;
   }
 

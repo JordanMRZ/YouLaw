@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { audio } from '../audio/audioManager'
-import { getLevel, levelCatalog, LEVEL_COUNT } from '../data/levels'
+import { getLevel, levelCatalog, WORLD_COUNT, worldOrder } from '../data/levels'
+import { firstLevelOfWorld, isWorldLocked, lastLevelOfWorld } from '../data/hubLayout'
+import { worldMeta } from '../data/worlds'
 import { formatTime } from '../game/scoring'
 import { useEditorStore } from '../store/editorStore'
 import { useGameStore } from '../store/gameStore'
@@ -19,6 +21,14 @@ export function Overlay() {
         if (state.mistake) return
         if (state.shopOpen) {
           state.setShopOpen(false)
+          return
+        }
+        if (state.settingsOpen) {
+          state.setSettingsOpen(false)
+          return
+        }
+        if (state.phase === 'hub' && state.hubLayer === 'world') {
+          state.exitWorldToGalaxy()
           return
         }
         if (state.phase === 'play') state.setPhase('paused')
@@ -41,16 +51,26 @@ export function Overlay() {
         return
       }
       if (state.phase === 'hub') {
-        if (state.shopOpen) return
+        if (state.shopOpen || state.settingsOpen) return
         if (event.code === 'ArrowRight' || event.code === 'KeyD') {
-          const next = Math.min(LEVEL_COUNT, state.selectedLevel + 1)
-          if (next <= state.save.unlockedLevel) state.setSelectedLevel(next)
+          event.preventDefault()
+          state.cycleHubSelection(1)
         }
         if (event.code === 'ArrowLeft' || event.code === 'KeyA') {
-          state.setSelectedLevel(Math.max(1, state.selectedLevel - 1))
+          event.preventDefault()
+          state.cycleHubSelection(-1)
         }
         if (event.code === 'Enter' || event.code === 'Space') {
-          if (state.selectedLevel <= state.save.unlockedLevel) state.startLevel(state.selectedLevel)
+          event.preventDefault()
+          if (state.hubLayer === 'galaxy') {
+            state.enterSelectedWorld()
+            return
+          }
+          if (state.selectedLevel <= state.save.unlockedLevel) {
+            audio.unlock()
+            audio.startMusic()
+            state.startLevel(state.selectedLevel)
+          }
         }
       }
     }
@@ -76,72 +96,110 @@ export function Overlay() {
 
 function HubChrome() {
   const selected = useGameStore((s) => s.selectedLevel)
+  const selectedWorld = useGameStore((s) => s.selectedWorld)
+  const hubLayer = useGameStore((s) => s.hubLayer)
   const save = useGameStore((s) => s.save)
   const shopOpen = useGameStore((s) => s.shopOpen)
   const settingsOpen = useGameStore((s) => s.settingsOpen)
   const meta = levelCatalog[selected - 1]
   const record = save.levels[String(selected)]
-  const locked = selected > save.unlockedLevel
+  const worldLocked = isWorldLocked(selectedWorld, save.unlockedLevel)
+  const levelLocked = selected > save.unlockedLevel
   const showEditor = useGameStore((s) => s.canOpenEditor)
+  const worldTitle = worldMeta[worldOrder[selectedWorld]]?.title ?? meta?.hubLabel
+  const canGoPrev = hubLayer === 'galaxy' ? selectedWorld > 0 : selected > firstLevelOfWorld(selectedWorld)
+  const canGoNext = hubLayer === 'galaxy' ? selectedWorld < WORLD_COUNT - 1 : selected < lastLevelOfWorld(selectedWorld)
+
+  function playOrEnter() {
+    const store = useGameStore.getState()
+    if (hubLayer === 'galaxy') {
+      store.enterSelectedWorld()
+      return
+    }
+    if (levelLocked) return
+    audio.unlock()
+    audio.startMusic()
+    store.startLevel(selected)
+  }
 
   return (
     <>
       {!shopOpen && (
-      <div className="hub-top">
-        <div className="hub-brand">
-          <p className="kicker">Aventura de inglés</p>
-          <h1>You Law Game</h1>
-        </div>
-        <div className="hub-actions">
-          <span className="xp-chip">{save.wallet} 🪙</span>
-          <span className="xp-chip xp">{save.xp} XP</span>
-          {showEditor && (
-            <button
-              type="button"
-              onClick={() => {
-                audio.unlock()
-                useEditorStore.getState().openEditor(selected)
-              }}
-            >
-              Editor
+        <div className="hub-top hub-top--minimal">
+          <div className="hub-actions">
+            <span className="xp-chip">{save.wallet} 🪙</span>
+            <span className="xp-chip xp">{save.xp} XP</span>
+            {showEditor && (
+              <button
+                type="button"
+                onClick={() => {
+                  audio.unlock()
+                  useEditorStore.getState().openEditor(selected)
+                }}
+              >
+                Editor
+              </button>
+            )}
+            <button type="button" onClick={() => useGameStore.getState().setShopOpen(true)}>
+              Tienda
             </button>
-          )}
-          <button type="button" onClick={() => useGameStore.getState().setShopOpen(true)}>
-            Tienda
-          </button>
-          <button type="button" onClick={() => useGameStore.getState().setSettingsOpen(true)}>
-            Audio
-          </button>
-        </div>
-      </div>
-      )}
-      {!shopOpen && (
-      <div className="hub-card">
-        <div className="hub-card-head">
-          <span className="hub-level-no">{String(selected).padStart(2, '0')}</span>
-          <div>
-            <p className="kicker">{meta?.hubLabel}</p>
-            <h2>{meta?.name}</h2>
+            <button type="button" onClick={() => useGameStore.getState().setSettingsOpen(true)}>
+              Audio
+            </button>
           </div>
         </div>
-        <p className="hub-sub">{meta?.subtitle}</p>
-        <p className="theme">{meta?.theme}</p>
-        <p className="stars">{starLine(record?.stars ?? 0)}</p>
-        {record && <p className="muted">Mejor {formatTime(record.bestTime)}</p>}
-        <button
-          type="button"
-          className="primary hub-play"
-          disabled={locked}
-          onClick={() => {
-            audio.unlock()
-            audio.startMusic()
-            useGameStore.getState().startLevel(selected)
-          }}
-        >
-          {locked ? 'Bloqueado' : 'Jugar'}
-        </button>
-        <p className="hint">A / D elige · Enter jugar · Clic en una plataforma</p>
-      </div>
+      )}
+      {!shopOpen && (
+        <>
+          {hubLayer === 'world' && (
+            <button type="button" className="hub-back" onClick={() => useGameStore.getState().exitWorldToGalaxy()}>
+              Atrás
+            </button>
+          )}
+          <button
+            type="button"
+            className="hub-nav hub-nav--left"
+            disabled={!canGoPrev}
+            aria-label="Anterior"
+            onClick={() => useGameStore.getState().cycleHubSelection(-1)}
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className="hub-nav hub-nav--right"
+            disabled={!canGoNext}
+            aria-label="Siguiente"
+            onClick={() => useGameStore.getState().cycleHubSelection(1)}
+          >
+            ›
+          </button>
+          <div className="hub-dock">
+            <p className="kicker">{hubLayer === 'galaxy' ? 'Mundo' : worldTitle}</p>
+            <h2>{hubLayer === 'galaxy' ? worldTitle : meta?.name}</h2>
+            {hubLayer === 'world' && (
+              <>
+                <p className="hub-sub">{meta?.subtitle}</p>
+                <p className="stars">{starLine(record?.stars ?? 0)}</p>
+                {record && <p className="muted">Mejor {formatTime(record.bestTime)}</p>}
+              </>
+            )}
+            <button
+              type="button"
+              className="primary hub-play"
+              disabled={hubLayer === 'galaxy' ? worldLocked : levelLocked}
+              onClick={playOrEnter}
+            >
+              {hubLayer === 'galaxy'
+                ? worldLocked
+                  ? 'Bloqueado'
+                  : 'Entrar'
+                : levelLocked
+                  ? 'Bloqueado'
+                  : 'Jugar'}
+            </button>
+          </div>
+        </>
       )}
       {shopOpen && <ShopPanel />}
       {settingsOpen && <SettingsPanel />}
