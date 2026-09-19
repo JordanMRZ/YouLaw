@@ -2,8 +2,8 @@ import { LEVELS_PER_WORLD, WORLD_COUNT } from './levels'
 
 export type HubLayer = 'galaxy' | 'world'
 
-export const PLANET_SPACING = 16
-export const PLANET_RADIUS = 4.6
+export const PLANET_SPACING = 20
+export const PLANET_RADIUS = 5
 
 export function planetPosition(worldIndex: number): [number, number, number] {
   return [worldIndex * PLANET_SPACING, 0, 0]
@@ -33,7 +33,7 @@ export function clampWorldIndex(index: number) {
 export function islandLocalOffset(localIndex: number, radius = PLANET_RADIUS): [number, number, number] {
   const yaw = ((localIndex - 2) / 2) * 0.78
   const pitch = 0.36
-  const r = radius + 0.38
+  const r = radius + 0.55
   return [
     Math.sin(yaw) * Math.cos(pitch) * r,
     Math.sin(pitch) * r,

@@ -34,7 +34,7 @@ export default function App() {
           key={canvasKey}
           shadows
           dpr={[1, 1.5]}
-          camera={{ position: [0, 1.2, 13], fov: 50, near: 0.1, far: 280 }}
+          camera={{ position: [0, 2.4, 18.5], fov: 42, near: 0.1, far: 320 }}
           gl={{ antialias: true, powerPreference: 'default', alpha: false, failIfMajorPerformanceCaveat: false }}
           onCreated={({ scene, gl }) => {
             scene.background = new Color('#071018')
