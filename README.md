@@ -9,9 +9,10 @@ Aplicación **YouLaw** — aprendizaje de inglés jurídico (Vue 3 + Vite). Los 
 Copia `.env.example` a `.env` y completa las variables `VITE_FIREBASE_*` (misma config web que ATAV).
 
 ```sh
-npm install
 npm run dev
 ```
+
+La primera vez (o si faltan paquetes tras un `git pull`), `npm run dev` ejecuta **`npm install` automáticamente** antes de levantar Vite. Usa **npm** en la raíz del repo (carpeta **YouLaw**, donde está `package.json`). El `.npmrc` incluye `legacy-peer-deps` para React 19 + HugeIcons.
 
 ## Acceso
 

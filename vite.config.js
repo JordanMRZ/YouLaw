@@ -1,14 +1,28 @@
+import { createRequire } from 'node:module'
 import { fileURLToPath, URL } from 'node:url'
-import { existsSync } from 'node:fs'
-import path from 'node:path'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import react from '@vitejs/plugin-react'
 
-const rootDir = fileURLToPath(new URL('.', import.meta.url))
-const hugeiconsCore = path.join(rootDir, 'node_modules/@hugeicons/core-free-icons/dist/esm/index.js')
-const hugeiconsVue = path.join(rootDir, 'node_modules/@hugeicons/vue/dist/esm/index.js')
+const require = createRequire(import.meta.url)
+
+function resolvePackageEntry(name) {
+  try {
+    return require.resolve(name)
+  } catch {
+    return null
+  }
+}
+
+const hugeiconsCore = resolvePackageEntry('@hugeicons/core-free-icons')
+const hugeiconsVue = resolvePackageEntry('@hugeicons/vue')
+
+if (!hugeiconsCore || !hugeiconsVue) {
+  console.warn(
+    '[YouLaw] HugeIcons no está instalado. Ejecuta `npm ci` en la raíz del proyecto antes de `npm run dev`.',
+  )
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -21,10 +35,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      ...(existsSync(hugeiconsCore)
-        ? { '@hugeicons/core-free-icons': hugeiconsCore }
-        : {}),
-      ...(existsSync(hugeiconsVue) ? { '@hugeicons/vue': hugeiconsVue } : {}),
+      ...(hugeiconsCore ? { '@hugeicons/core-free-icons': hugeiconsCore } : {}),
+      ...(hugeiconsVue ? { '@hugeicons/vue': hugeiconsVue } : {}),
     },
   },
   assetsInclude: ['**/*.wasm'],
