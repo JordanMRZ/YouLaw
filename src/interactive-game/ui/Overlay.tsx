@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { audio } from '../audio/audioManager'
-import { getLevel, levelCatalog, WORLD_COUNT, worldOrder } from '../data/levels'
+import { getLevel, LEVEL_COUNT, levelCatalog, WORLD_COUNT, worldOrder } from '../data/levels'
 import { firstLevelOfWorld, isWorldLocked, lastLevelOfWorld } from '../data/hubLayout'
 import { worldMeta } from '../data/worlds'
 import { formatTime } from '../game/scoring'
