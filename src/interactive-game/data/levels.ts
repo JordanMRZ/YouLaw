@@ -50,7 +50,7 @@ const legacyCatalog = [
   { id: 8, name: 'Chaos Bridge', subtitle: 'Grammar in the middle of the storm.', theme: 'Mixed skills', hubLabel: 'CHAOS FACTORY', world: 'chaos' as const },
   { id: 9, name: "Teacher's Challenge", subtitle: 'Real staff-room English. Walk the school.', theme: 'Professional classroom English', hubLabel: 'INTERNATIONAL SCHOOL', world: 'international' as const },
   { id: 10, name: 'The Final Bridge', subtitle: 'Everything you learned. One last crossing.', theme: 'Mixed mastery', hubLabel: 'ENGLISH BRIDGE', world: 'bridge' as const },
-  { id: 11, name: 'Those who snow', subtitle: 'test', theme: 'Mixed mastery', hubLabel: 'ENGLISH BRIDGE', world: 'bridge' as const },
+  { id: 11, name: 'Bouncing Valley', subtitle: 'Bouncepads everywhere!', theme: 'Think fast.', hubLabel: 'CITY', world: 'time' as const },
 
 ]
 
