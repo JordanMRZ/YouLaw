@@ -9,6 +9,7 @@ import LessonPreparation from './components/lessons/LessonPreparation.vue'
 import DiagnosticAssessment from './components/lessons/DiagnosticAssessment.vue'
 import LessonComplete from './components/lessons/LessonComplete.vue'
 import SettingsModal from './components/layout/SettingsModal.vue'
+import StreakCelebrationOverlay from './components/lessons/StreakCelebrationOverlay.vue'
 import DashboardView from './views/DashboardView.vue'
 import LessonsView from './views/LessonsView.vue'
 import AchievementsView from './views/AchievementsView.vue'
@@ -41,6 +42,9 @@ const {
   lessons: learningLessons,
   setLearningLevel,
   lessonSummary,
+  consecutiveCorrect,
+  showStreakCelebration,
+  dismissStreakCelebration,
   openLesson,
   startLesson,
   selectAnswer,
@@ -113,12 +117,6 @@ function handleLessonAnswer(option) {
     window.setTimeout(() => {
       lifeShake.value = false
     }, 450)
-  }
-
-  if (result !== 'locked') {
-    window.setTimeout(() => {
-      nextExercise()
-    }, 220)
   }
 }
 
@@ -197,8 +195,9 @@ watch(lessonSummary, (summary) => {
     </main>
     <LessonPreparation v-if="selectedLesson && currentFlow === 'lessonPreparation'" :lesson="selectedLesson" @begin-lesson="startLesson(); currentFlow = 'lesson'" @close="closeFlow" />
     <DiagnosticAssessment v-else-if="currentFlow === 'diagnostic' || currentFlow === 'diagnosticResult'" :question="currentQuestion" :question-number="questionNumber" :question-count="20" :progress="progress" :level-label="levelLabel" :current-level="currentLevel" :selected-answer="diagnosticSelectedAnswer" :answer-status="diagnosticAnswerStatus" :is-complete="isComplete" :correct-answers="correctAnswers" :category-scores="categoryScores" @answer="answerDiagnostic" @next="nextDiagnostic" @start="beginDiagnostic" @continue="continueFromDiagnostic" @close="closeFlow" />
-    <ExerciseModal v-else-if="selectedLesson && currentFlow === 'lesson'" :lesson="selectedLesson" :exercise="currentExercise" :exercise-index="exerciseIndex" :exercise-count="exerciseCount" :selected-answer="selectedAnswer" :answer-status="answerStatus" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" @answer="handleLessonAnswer" @next="nextExercise" @close="closeFlow" />
+    <ExerciseModal v-else-if="selectedLesson && currentFlow === 'lesson'" :lesson="selectedLesson" :exercise="currentExercise" :exercise-index="exerciseIndex" :exercise-count="exerciseCount" :selected-answer="selectedAnswer" :answer-status="answerStatus" :consecutive-correct="consecutiveCorrect" :lives="lives" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" @answer="handleLessonAnswer" @next="nextExercise" @close="closeFlow" />
     <LessonComplete v-else-if="currentFlow === 'lessonComplete'" :summary="lessonSummary" @advance-level="advanceToLevel" @close="closeFlow" />
     <SettingsModal v-if="showSettings" :dark-mode="isDarkMode" :user-email="user?.email" @close="showSettings = false" @toggle-dark-mode="toggleDarkMode" @set-testing-level="applyTestingLevel" @reset="resetAllProgress" @logout="handleLogout" />
+    <StreakCelebrationOverlay v-if="showStreakCelebration" @close="dismissStreakCelebration" />
   </div>
 </template>

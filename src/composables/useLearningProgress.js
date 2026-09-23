@@ -21,6 +21,8 @@ export function useLearningProgress() {
   const completedLessons = ref([])
   const lessonSummary = ref(null)
   const activeExercises = ref([])
+  const consecutiveCorrect = ref(0)
+  const showStreakCelebration = ref(false)
   let lastCorrectOptionIndex = -1
   const lessons = computed(() => lessonsByLevel[learningLevel.value] || lessonsByLevel.A1)
   const availableExercises = computed(() => {
@@ -129,11 +131,18 @@ export function useLearningProgress() {
     answerStatus.value = isCorrect ? 'correct' : 'incorrect'
 
     if (isCorrect) {
-      totalXp.value += 10
+      consecutiveCorrect.value += 1
+      let bonusXp = 10
+      if (consecutiveCorrect.value === 5) {
+        showStreakCelebration.value = true
+        bonusXp += 25
+      }
+      totalXp.value += bonusXp
       saveProgress({ xp: totalXp.value, lives: lives.value, lockUntil: lockUntil.value })
       return 'correct'
     }
 
+    consecutiveCorrect.value = 0
     lives.value = Math.max(0, lives.value - 1)
     if (lives.value === 0) {
       lockUntil.value = Date.now() + lifeLockDurationMs
@@ -142,6 +151,10 @@ export function useLearningProgress() {
 
     saveProgress({ xp: totalXp.value, lives: lives.value, lockUntil: lockUntil.value })
     return lives.value === 0 ? 'blocked' : 'lost-life'
+  }
+
+  function dismissStreakCelebration() {
+    showStreakCelebration.value = false
   }
 
   function nextExercise() {
@@ -207,6 +220,8 @@ export function useLearningProgress() {
     wrongReviewQueue.value = []
     exerciseIndex.value = 0
     lessonSummary.value = null
+    consecutiveCorrect.value = 0
+    showStreakCelebration.value = false
     saveProgress({ xp: totalXp.value, lives: lives.value, lockUntil: null, completedLessons: completedLessons.value })
   }
 
@@ -226,6 +241,9 @@ export function useLearningProgress() {
     lessons,
     completedLessons,
     lessonSummary,
+    consecutiveCorrect,
+    showStreakCelebration,
+    dismissStreakCelebration,
     openLesson,
     startLesson,
     setLearningLevel,

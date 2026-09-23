@@ -137,54 +137,74 @@ export const exercises = [
 
 export const lessonExercisesById = {
   'A1-1': [
-    { prompt: 'A person who represents a client is a ___.', options: ['lawyer', 'witness', 'judge'], correctAnswer: 'lawyer' },
+    { prompt: 'A person who represents a client in legal matters is a ___.', options: ['lawyer', 'witness', 'judge'], correctAnswer: 'lawyer' },
     { prompt: 'Complete: I ___ a law professor.', options: ['am', 'is', 'are'], correctAnswer: 'am' },
     { prompt: 'Choose the greeting for a new colleague.', options: ['Nice to meet you.', 'Close the case.', 'Sign the sentence.'], correctAnswer: 'Nice to meet you.' },
+    { prompt: 'The client explains their case to the ___.', options: ['lawyer', 'sentence', 'window'], correctAnswer: 'lawyer' },
+    { prompt: 'Complete: We ___ legal terms today.', options: ['study', 'studies', 'studying'], correctAnswer: 'study' },
   ],
   'A1-2': [
     { prompt: 'A judge works in a ___.', options: ['court', 'contract', 'witness'], correctAnswer: 'court' },
     { prompt: 'Complete: The judge ___ in court.', options: ['works', 'work', 'working'], correctAnswer: 'works' },
     { prompt: 'A person who gives information about an event is a ___.', options: ['witness', 'law', 'sentence'], correctAnswer: 'witness' },
+    { prompt: 'The witness speaks inside the ___.', options: ['courtroom', 'station', 'kitchen'], correctAnswer: 'courtroom' },
+    { prompt: 'A judge must always remain ___.', options: ['impartial', 'tired', 'absent'], correctAnswer: 'impartial' },
   ],
   'A1-3': [
     { prompt: 'A formal agreement is a ___.', options: ['contract', 'hearing', 'lawyer'], correctAnswer: 'contract' },
     { prompt: 'Complete: They ___ the document.', options: ['sign', 'signs', 'signing'], correctAnswer: 'sign' },
     { prompt: 'A contract is an agreement between two or more ___.', options: ['parties', 'courts', 'sentences'], correctAnswer: 'parties' },
+    { prompt: 'Both parties agree to ___ the terms of the agreement.', options: ['accept', 'refuse', 'destroy'], correctAnswer: 'accept' },
+    { prompt: 'Complete: This contract is legally ___.', options: ['valid', 'singing', 'eating'], correctAnswer: 'valid' },
   ],
   'A1-4': [
     { prompt: 'The person accused of a crime is the ___.', options: ['defendant', 'witness', 'lawyer'], correctAnswer: 'defendant' },
     { prompt: 'Complete: The defendant ___ a lawyer.', options: ['needs', 'need', 'needing'], correctAnswer: 'needs' },
-    { prompt: 'A judge makes a ___.', options: ['decision', 'kitchen', 'meeting'], correctAnswer: 'decision' },
+    { prompt: 'A judge makes an official ___.', options: ['decision', 'kitchen', 'meeting'], correctAnswer: 'decision' },
+    { prompt: 'Every defendant has the right to a legal ___.', options: ['defense', 'dinner', 'holiday'], correctAnswer: 'defense' },
+    { prompt: 'Complete: The court examines the ___ carefully.', options: ['evidence', 'music', 'lunch'], correctAnswer: 'evidence' },
   ],
   'A1-5': [
     { prompt: 'Complete: The plaintiff ___ a claim.', options: ['has', 'have', 'having'], correctAnswer: 'has' },
-    { prompt: 'What do you ask when you do not understand?', options: ['Could you repeat that?', 'Close the court.', 'I signed yesterday.'], correctAnswer: 'Could you repeat that?' },
+    { prompt: 'What do you ask when you do not understand in court?', options: ['Could you repeat that?', 'Close the court.', 'I signed yesterday.'], correctAnswer: 'Could you repeat that?' },
     { prompt: 'Choose the simple question about a case.', options: ['What happened?', 'Where happened yesterday?', 'What did happened?'], correctAnswer: 'What happened?' },
+    { prompt: 'Complete: The preliminary hearing is ___ in Room 3.', options: ['held', 'holding', 'holds'], correctAnswer: 'held' },
+    { prompt: 'The attorney asks: "Do you have any ___?"', options: ['questions', 'courts', 'judges'], correctAnswer: 'questions' },
   ],
   'A1-6': [
     { prompt: 'A document contains written ___.', options: ['information', 'witnesses', 'courts'], correctAnswer: 'information' },
     { prompt: 'Complete: Please ___ this form.', options: ['complete', 'completes', 'completing'], correctAnswer: 'complete' },
     { prompt: 'A signature identifies a ___.', options: ['person', 'hearing', 'sentence'], correctAnswer: 'person' },
+    { prompt: 'Please read every ___ in the document carefully.', options: ['clause', 'car', 'tree'], correctAnswer: 'clause' },
+    { prompt: 'Complete: The official file is on the lawyer’s ___.', options: ['desk', 'sky', 'cloud'], correctAnswer: 'desk' },
   ],
   'A1-7': [
     { prompt: 'Complete: The meeting is ___ Monday.', options: ['on', 'in', 'at'], correctAnswer: 'on' },
     { prompt: 'An appointment is a planned ___.', options: ['meeting', 'witness', 'law'], correctAnswer: 'meeting' },
     { prompt: 'Choose the correct time expression.', options: ['at ten o’clock', 'on ten o’clock', 'in ten o’clock'], correctAnswer: 'at ten o’clock' },
+    { prompt: 'The court hearing is scheduled ___ 9:00 AM.', options: ['for', 'under', 'between'], correctAnswer: 'for' },
+    { prompt: 'Complete: The filing deadline is ___.', options: ['tomorrow', 'yesterday', 'passed'], correctAnswer: 'tomorrow' },
   ],
   'A1-8': [
     { prompt: 'Complete: The case ___ in court today.', options: ['is', 'are', 'be'], correctAnswer: 'is' },
-    { prompt: 'The lawyer gives the client ___.', options: ['information', 'punishment', 'court'], correctAnswer: 'information' },
+    { prompt: 'The lawyer gives the client legal ___.', options: ['advice', 'punishment', 'court'], correctAnswer: 'advice' },
     { prompt: 'Choose a simple sentence about a case.', options: ['The hearing is today.', 'The hearing today are.', 'Today hearing be.'], correctAnswer: 'The hearing is today.' },
+    { prompt: 'The client explains the facts of the ___.', options: ['matter', 'weather', 'lunch'], correctAnswer: 'matter' },
+    { prompt: 'Complete: We must submit the documents in ___.', options: ['advance', 'behind', 'under'], correctAnswer: 'advance' },
   ],
   'A1-9': [
     { prompt: 'What is the opposite of guilty?', options: ['innocent', 'official', 'legal'], correctAnswer: 'innocent' },
     { prompt: 'A judge, lawyer and witness are legal ___.', options: ['roles', 'contracts', 'dates'], correctAnswer: 'roles' },
     { prompt: 'Complete: They ___ the document yesterday.', options: ['signed', 'sign', 'signing'], correctAnswer: 'signed' },
+    { prompt: 'The defendant is presumed ___ until proven guilty.', options: ['innocent', 'closed', 'empty'], correctAnswer: 'innocent' },
+    { prompt: 'Complete: The court will deliver its ___ next week.', options: ['verdict', 'contract', 'appointment'], correctAnswer: 'verdict' },
   ],
   'A1-10': [
     { prompt: 'A person who brings a case is a ___.', options: ['plaintiff', 'sentence', 'contract'], correctAnswer: 'plaintiff' },
     { prompt: 'Complete: The court ___ the case.', options: ['hears', 'hear', 'hearing'], correctAnswer: 'hears' },
     { prompt: 'Choose the correct sentence.', options: ['The lawyer helps the client.', 'The lawyer help the client.', 'The lawyer helping client.'], correctAnswer: 'The lawyer helps the client.' },
+    { prompt: 'The final decision in a trial is the ___.', options: ['judgment', 'pencil', 'chair'], correctAnswer: 'judgment' },
+    { prompt: 'Complete: The formal proceedings are now ___.', options: ['concluded', 'concluding', 'conclude'], correctAnswer: 'concluded' },
   ],
 }
 
