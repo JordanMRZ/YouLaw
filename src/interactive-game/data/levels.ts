@@ -12,6 +12,8 @@ import { createLevel09 } from './levels/level09'
 import { createLevel10 } from './levels/level10'
 import { createLevel11 } from './levels/level11'
 import { createLevel12 } from './levels/level12'
+import { createLevel13 } from './levels/level13'
+import { createLevel14 } from './levels/level14'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -53,6 +55,8 @@ const legacyCatalog = [
   { id: 10, name: 'The Final Bridge', subtitle: 'Everything you learned. One last crossing.', theme: 'Mixed mastery', hubLabel: 'ENGLISH BRIDGE', world: 'bridge' as const },
   { id: 11, name: 'Bouncing Valley', subtitle: 'Bouncepads everywhere!', theme: 'Think fast.', hubLabel: 'TIME GARDENS', world: 'time' as const },
   { id: 12, name: 'Take it easy', subtitle: 'Patience is key.', theme: 'Moving platforms', hubLabel: 'TIME GARDENS', world: 'time' as const },
+  { id: 13, name: 'Watch your step', subtitle: 'Be careful and plan where you\'re going.', theme: 'Platforming, context and grammar', hubLabel: 'TIME GARDENS', world: 'time' as const },
+  { id: 14, name: 'Climbing Time', subtitle: 'Climb through the wall.', theme: 'High jumping, context and grammar', hubLabel: 'TIME GARDENS', world: 'time' as const },
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -86,9 +90,11 @@ const factories: Record<number, () => LevelDef> = {
   10: createLevel10,
   11: createLevel11,
   12: createLevel12,
+  13: createLevel13,
+  14: createLevel14,
 }
 
-for (let id = 12; id <= LEVEL_COUNT; id += 1) {
+for (let id = 14; id <= LEVEL_COUNT; id += 1) {
   const world = worldForLevel(id)
   const localLevel = localLevelForId(id)
   factories[id] = () => createTemplateLevel(id, world, localLevel)

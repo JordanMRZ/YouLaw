@@ -177,6 +177,12 @@ export function EditorPanel() {
           <button type="button" className={previewMotion ? 'on' : ''} onClick={() => useEditorStore.getState().setPreviewMotion(!previewMotion)}>
             Animar
           </button>
+          <button type="button" onClick={() => useEditorStore.getState().copySelected()}>
+            Copiar
+          </button>
+          <button type="button" onClick={() => useEditorStore.getState().pasteClipboard()}>
+            Pegar
+          </button>
         </div>
         <div className="editor-tools editor-toolbar-end">
           <button type="button" className="primary" onClick={() => useEditorStore.getState().playtest()}>

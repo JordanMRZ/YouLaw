@@ -1,6 +1,4 @@
 import type { LevelDef } from '../types'
-import { TrackBuilder } from '../trackBuilder'
-import { palettes } from '../worlds'
 
 export function createLevel12(): LevelDef {
   return {
@@ -285,6 +283,26 @@ export function createLevel12(): LevelDef {
       {
         id: "nmuecxautj",
         position: [11, 7.2, 104]
+      },
+      {
+        id: "nmuejjoqu2",
+        position: [0, 3.7, 147.5]
+      },
+      {
+        id: "nmuejkboc3",
+        position: [0, 3.7, 149]
+      },
+      {
+        id: "nmuejkv5t4",
+        position: [0, 3.7, 146]
+      },
+      {
+        id: "nmuejmps35",
+        position: [0, 3.7, 144.5]
+      },
+      {
+        id: "nmuejndog6",
+        position: [0, 3.7, 143]
       }
     ],
     checkpoints: [

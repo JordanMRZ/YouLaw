@@ -164,6 +164,13 @@ export function exportLevelTs(level: LevelDef) {
 
 let messageTimer: number | null = null
 
+type EditorClipboard =
+  | {
+      kind: 'platform' | 'coin' | 'obstacle' | 'checkpoint' | 'goal' | 'start'
+      item: Record<string, unknown>
+    }
+  | null
+
 interface EditorState {
   levelId: number
   draft: LevelDef | null
@@ -175,6 +182,7 @@ interface EditorState {
   undoStack: string[]
   message: string | null
   dirty: boolean
+  clipboard: EditorClipboard
   openEditor: (levelId: number) => void
   leaveEditor: () => void
   switchLevel: (levelId: number) => void
@@ -187,6 +195,8 @@ interface EditorState {
   undo: () => void
   applyWorldTransform: (position: Vec3, size: Vec3) => void
   patchSelected: (patch: Record<string, unknown>) => void
+  copySelected: () => void
+  pasteClipboard: () => void
   addKit: (kind: AddKit) => void
   deleteSelected: () => void
   resetToCode: () => void
@@ -218,6 +228,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   undoStack: [],
   message: null,
   dirty: false,
+  clipboard: null,
 
   openEditor: (levelId) => {
     const stored = peekDraft(levelId)
@@ -428,6 +439,125 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ draft: next, dirty: true })
   },
 
+  copySelected: () => {
+    const { draft, selected } = get()
+    if (!draft || !selected) return
+    let item: Record<string, unknown> | null = null
+    switch (selected.kind) {
+      case 'platform': {
+        const match = draft.platforms.find((entry) => entry.id === selected.id)
+        if (match) item = structuredClone(match) as Record<string, unknown>
+        break
+      }
+      case 'coin': {
+        const match = draft.coins.find((entry) => entry.id === selected.id)
+        if (match) item = structuredClone(match) as Record<string, unknown>
+        break
+      }
+      case 'obstacle': {
+        const match = draft.obstacles.find((entry) => entry.id === selected.id)
+        if (match) item = structuredClone(match) as Record<string, unknown>
+        break
+      }
+      case 'checkpoint': {
+        const match = draft.checkpoints.find((entry) => entry.id === selected.id)
+        if (match) item = structuredClone(match) as Record<string, unknown>
+        break
+      }
+      case 'goal':
+        item = structuredClone(draft.goal) as Record<string, unknown>
+        break
+      case 'start':
+        item = { position: structuredClone(draft.start) } as Record<string, unknown>
+        break
+      default:
+        break
+    }
+    if (!item) {
+      showMessage(set, 'No se puede copiar este tipo')
+      return
+    }
+    set({ clipboard: { kind: selected.kind, item } })
+    showMessage(set, 'Elemento copiado')
+  },
+
+  pasteClipboard: () => {
+    const { draft, clipboard, levelId } = get()
+    if (!draft || !clipboard) {
+      showMessage(set, 'Nada que pegar')
+      return
+    }
+    const next = cloneLevel(draft)
+    const offset: Vec3 = [1.5, 0.8, 2]
+    let selected: EditorSelection | null = null
+    const cloned = structuredClone(clipboard.item) as Record<string, unknown>
+    switch (clipboard.kind) {
+      case 'platform': {
+        const platform = cloned as PlatformDef
+        platform.id = uid('p')
+        platform.position = [
+          platform.position[0] + offset[0],
+          platform.position[1] + offset[1],
+          platform.position[2] + offset[2],
+        ]
+        next.platforms.push(platform)
+        selected = { kind: 'platform', id: platform.id }
+        break
+      }
+      case 'coin': {
+        const coin = cloned as { id: string; position: Vec3 }
+        coin.id = uid('n')
+        coin.position = [coin.position[0] + offset[0], coin.position[1] + offset[1], coin.position[2] + offset[2]]
+        next.coins.push(coin)
+        selected = { kind: 'coin', id: coin.id }
+        break
+      }
+      case 'obstacle': {
+        const obstacle = cloned as ObstacleDef
+        obstacle.id = uid('o')
+        obstacle.position = [
+          obstacle.position[0] + offset[0],
+          obstacle.position[1] + offset[1],
+          obstacle.position[2] + offset[2],
+        ]
+        next.obstacles.push(obstacle)
+        selected = { kind: 'obstacle', id: obstacle.id }
+        break
+      }
+      case 'checkpoint': {
+        const checkpoint = cloned as { id: string; position: Vec3; width?: number }
+        checkpoint.id = uid('k')
+        checkpoint.position = [
+          checkpoint.position[0] + offset[0],
+          checkpoint.position[1] + offset[1],
+          checkpoint.position[2] + offset[2],
+        ]
+        next.checkpoints.push(checkpoint)
+        selected = { kind: 'checkpoint', id: checkpoint.id }
+        break
+      }
+      case 'goal': {
+        const goal = cloned as { position: Vec3; size?: Vec3 }
+        goal.position = [goal.position[0] + offset[0], goal.position[1] + offset[1], goal.position[2] + offset[2]]
+        next.goal = { ...next.goal, ...goal }
+        selected = { kind: 'goal', id: 'goal' }
+        break
+      }
+      case 'start': {
+        const start = cloned as { position: Vec3 }
+        start.position = [start.position[0] + offset[0], start.position[1] + offset[1], start.position[2] + offset[2]]
+        next.start = start.position
+        selected = { kind: 'start', id: 'start' }
+        break
+      }
+      default:
+        break
+    }
+    persist(levelId, next)
+    set({ draft: next, selected, dirty: true, focusToken: get().focusToken + 1 })
+    showMessage(set, 'Pegaado')
+  },
+
   addKit: (kind) => {
     const { draft, levelId } = get()
     if (!draft) return
@@ -552,6 +682,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     await navigator.clipboard.writeText(exportLevelTs(draft))
     showMessage(set, 'TypeScript copiado')
   },
+
 }))
 
 function colorForPlatform(kind: PlatformKind) {
