@@ -22,6 +22,10 @@ La primera vez (o si faltan paquetes tras un `git pull`), `npm run dev` ejecuta 
 
 El primer registro de contraseña se hace en ATAV, no en YouLaw.
 
+## Manual de usuario
+
+Guía para docentes (plataforma + juego 3D): [docs/MANUAL-USUARIO.md](docs/MANUAL-USUARIO.md).
+
 ## Didáctico (juego 3D)
 
 El juego **You Law Game** vive en `src/interactive-game/` y se abre desde el sidebar (**Didactico**), con el menú lateral siempre visible. El código fuente anterior estaba en `JuegoDerecho` / repo YouLawGame; el desarrollo activo es solo este repositorio.
