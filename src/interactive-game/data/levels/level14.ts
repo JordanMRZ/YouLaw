@@ -3,9 +3,9 @@ import type { LevelDef } from '../types'
 export function createLevel14(): LevelDef {
   return {
     id: 14,
-    name: "Climbing Time",
-    subtitle: "Climb through the wall.",
-    theme: "Platforming, context and grammar",
+    name: "Time Gardens 4",
+    subtitle: "Plantilla editable de layout.",
+    theme: "Personaliza este tema",
     world: "time",
     hubLabel: "TIME GARDENS",
     parTime: 90,
@@ -22,7 +22,7 @@ export function createLevel14(): LevelDef {
     platforms: [
       {
         id: "p1",
-        position: [-0.5, 2, 6.5],
+        position: [-0.5, 2, 2.5],
         size: [13.5, 1.22, 12.5],
         kind: "static",
         color: "#800080"
@@ -36,28 +36,28 @@ export function createLevel14(): LevelDef {
       {
         id: "pmufrhus03",
         kind: "static",
-        position: [3.5, 4, 11.5],
+        position: [3.5, 4, 7.5],
         size: [4, 2.3, 2.5],
         color: "#800080"
       },
       {
         id: "pmufrkmpk4",
         kind: "bounce",
-        position: [-2, 6.5, 11],
+        position: [-2, 6.5, 8],
         size: [2.5, 0.8, 2.5],
         color: "#ff00ff"
       },
       {
         id: "pmufsc46v2",
         kind: "bounce",
-        position: [2, 10.3, 11],
+        position: [2, 9.8, 8],
         size: [2.5, 0.8, 2.5],
         color: "#ff00ff"
       },
       {
         id: "pmufscjr13",
         kind: "bounce",
-        position: [-3, 12.1, 11],
+        position: [-3, 12.1, 8],
         size: [2.5, 0.8, 2.5],
         color: "#ff00ff"
       },
@@ -156,7 +156,7 @@ export function createLevel14(): LevelDef {
       {
         id: "qmufvuwt93",
         type: "grammar",
-        origin: [-0.5, 14, 21],
+        origin: [-0.5, 14, 20],
         options: [
           {
             word: "IN",
@@ -227,8 +227,8 @@ export function createLevel14(): LevelDef {
       {
         id: "omufrctmo2",
         kind: "barrier",
-        position: [-0.5, 7.5, 15],
-        size: [13.5, 12.5, 4.85]
+        position: [-0.5, 7.5, 12],
+        size: [13.5, 12.5, 6.85]
       },
       {
         id: "omufxvokob",
