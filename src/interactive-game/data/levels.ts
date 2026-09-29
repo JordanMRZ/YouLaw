@@ -11,6 +11,11 @@ import { createLevel08 } from './levels/level08'
 import { createLevel09 } from './levels/level09'
 import { createLevel10 } from './levels/level10'
 import { createLevel11 } from './levels/level11'
+import { createLevel12 } from './levels/level12'
+import { createLevel13 } from './levels/level13'
+import { createLevel14 } from './levels/level14'
+import { createLevel15 } from './levels/level15'
+import { createLevel16 } from './levels/level16'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -50,8 +55,12 @@ const legacyCatalog = [
   { id: 8, name: 'Chaos Bridge', subtitle: 'Grammar in the middle of the storm.', theme: 'Mixed skills', hubLabel: 'CHAOS FACTORY', world: 'chaos' as const },
   { id: 9, name: "Teacher's Challenge", subtitle: 'Real staff-room English. Walk the school.', theme: 'Professional classroom English', hubLabel: 'INTERNATIONAL SCHOOL', world: 'international' as const },
   { id: 10, name: 'The Final Bridge', subtitle: 'Everything you learned. One last crossing.', theme: 'Mixed mastery', hubLabel: 'ENGLISH BRIDGE', world: 'bridge' as const },
-  { id: 11, name: 'Bouncing Valley', subtitle: 'Bouncepads everywhere!', theme: 'Think fast.', hubLabel: 'CITY', world: 'time' as const },
-
+  { id: 11, name: 'Bouncing Valley', subtitle: 'Bouncepads everywhere!', theme: 'Think fast.', hubLabel: 'TIME GARDENS', world: 'time' as const },
+  { id: 12, name: 'Take it easy', subtitle: 'Patience is key.', theme: 'Moving platforms', hubLabel: 'TIME GARDENS', world: 'time' as const },
+  { id: 13, name: 'Watch your step', subtitle: 'Be careful and plan where you\'re going.', theme: 'Platforming, context and grammar', hubLabel: 'TIME GARDENS', world: 'time' as const },
+  { id: 14, name: 'Climbing Time', subtitle: 'Climb through the wall.', theme: 'High jumping, context and grammar', hubLabel: 'TIME GARDENS', world: 'time' as const },
+  { id: 15, name: 'Listening Practice', subtitle: 'Go through the boxes and listen to the audio.', theme: 'Moving platforms, listening', hubLabel: 'TIME GARDENS', world: 'time' as const },
+  { id: 16, name: 'Scrapped Machinery', subtitle: 'Navigate through the industrial zone.', theme: 'Vocabulary, moving blocks, rotating platforms', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -84,9 +93,16 @@ const factories: Record<number, () => LevelDef> = {
   9: createLevel09,
   10: createLevel10,
   11: createLevel11,
+  12: createLevel12,
+  13: createLevel13,
+  14: createLevel14,
+  15: createLevel15,
+  16: createLevel16,
 }
 
-for (let id = 12; id <= LEVEL_COUNT; id += 1) {
+// Los niveles personalizados de prueba quedan definidos explícitamente en factory map.
+// Desde 15 en adelante, el resto usa la plantilla generada automáticamente.
+for (let id = 20; id <= LEVEL_COUNT; id += 1) {
   const world = worldForLevel(id)
   const localLevel = localLevelForId(id)
   factories[id] = () => createTemplateLevel(id, world, localLevel)

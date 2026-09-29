@@ -228,9 +228,13 @@ function HUD() {
         <div className={`streak ${streak >= 2 ? 'hot' : ''}`}>{streak >= 2 ? `STREAK x${streak}` : 'STREAK x0'}</div>
         <div className="time">{coins} 🪙 · {formatTime(elapsed)}</div>
       </div>
-      {prompt && <div className="prompt">{prompt}</div>}
-      {prompt && challengeTimeLeft > 0 && !mistake && (
-        <div className={`q-timer ${challengeTimeLeft <= 5 ? 'urgent' : ''}`}>{Math.ceil(challengeTimeLeft)}</div>
+      {prompt && (
+        <div className="question-bar">
+          <div className="prompt">{prompt}</div>
+          {challengeTimeLeft > 0 && !mistake && (
+            <div className={`q-timer ${challengeTimeLeft <= 5 ? 'urgent' : ''}`}>{Math.ceil(challengeTimeLeft)}</div>
+          )}
+        </div>
       )}
       {coachLine && <div className="coach">{coachLine}</div>}
       {toast && <div className="toast">{toast}</div>}

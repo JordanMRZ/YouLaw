@@ -60,6 +60,7 @@ canvas {
 .hub-nav,
 .hub-back,
 .modal,
+.question-bar,
 .prompt,
 .toast,
 .xp-pop,
@@ -322,11 +323,21 @@ canvas {
   text-align: right;
 }
 
-.prompt {
+.question-bar {
   position: absolute;
   top: 82px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: min(920px, calc(100% - 40px));
+  width: max-content;
+  pointer-events: none;
+}
+
+.prompt {
   padding: 12px 28px;
   border-radius: 18px;
   background: rgba(16, 32, 48, 0.62);
@@ -334,16 +345,13 @@ canvas {
   font-weight: 800;
   letter-spacing: 0.01em;
   text-align: center;
-  max-width: min(920px, calc(100% - 40px));
+  width: 100%;
+  max-width: min(920px, calc(100vw - 40px));
   line-height: 1.2;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .q-timer {
-  position: absolute;
-  top: 148px;
-  left: 50%;
-  transform: translateX(-50%);
   min-width: 64px;
   padding: 6px 16px;
   border-radius: 999px;
@@ -352,7 +360,7 @@ canvas {
   font-weight: 800;
   text-align: center;
   letter-spacing: 0.04em;
-  pointer-events: none;
+  flex-shrink: 0;
 }
 
 .q-timer.urgent {
@@ -736,9 +744,16 @@ label {
     padding: 10px 14px;
   }
 
+  .question-bar {
+    top: 72px;
+    max-width: calc(100% - 20px);
+    width: calc(100% - 20px);
+  }
+
   .prompt {
     font-size: 20px;
-    width: calc(100% - 20px);
+    width: 100%;
+    max-width: none;
     text-align: center;
     padding: 8px 12px;
   }
@@ -748,7 +763,6 @@ label {
   }
 
   .q-timer {
-    top: 96px;
     font-size: 18px;
   }
 
