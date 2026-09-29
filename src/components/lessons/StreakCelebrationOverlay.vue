@@ -126,16 +126,18 @@ onBeforeUnmount(() => {
 .celebration-card {
   position: relative;
   z-index: 10;
-  width: min(520px, 94vw);
+  width: min(480px, 92vw);
+  max-height: calc(100vh - 36px);
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   border: 3px solid rgba(251, 191, 36, 0.4);
   border-bottom-width: 6px;
-  border-radius: 28px;
-  padding: 28px 24px 22px;
+  border-radius: 24px;
+  padding: 20px 20px 16px;
   text-align: center;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(245, 158, 11, 0.25);
   animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   color: #ffffff;
+  overflow-y: auto;
 }
 
 .celebration-top-glow {
@@ -150,17 +152,17 @@ onBeforeUnmount(() => {
 }
 
 .fire-badge {
-  font-size: 26px;
-  letter-spacing: 4px;
+  font-size: 20px;
+  letter-spacing: 3px;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   animation: flamePulse 1s ease-in-out infinite alternate;
 }
 
 .celebration-heading {
-  font-size: clamp(22px, 5vw, 30px);
+  font-size: clamp(20px, 4.5vw, 24px);
   font-weight: 900;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #fb923c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -170,10 +172,10 @@ onBeforeUnmount(() => {
 
 .celebration-subheading {
   color: #cbd5e1;
-  font-size: 14.5px;
-  line-height: 1.45;
-  margin: 0 auto 16px;
-  max-width: 400px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  margin: 0 auto 10px;
+  max-width: 380px;
 }
 
 .xp-bonus {
@@ -185,12 +187,12 @@ onBeforeUnmount(() => {
 .dancing-stage {
   position: relative;
   width: 100%;
-  height: 290px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .lawyer-motion-wrapper {
@@ -202,24 +204,24 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .celebration-continue-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  max-width: 320px;
-  padding: 14px 28px;
+  max-width: 300px;
+  padding: 12px 24px;
   background: linear-gradient(180deg, #10b981 0%, #059669 100%);
   color: #ffffff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
   border: none;
   border-bottom: 4px solid #047857;
-  border-radius: 16px;
+  border-radius: 14px;
   cursor: pointer;
   box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
   transition: transform 0.12s ease, filter 0.12s ease;
@@ -236,7 +238,7 @@ onBeforeUnmount(() => {
 }
 
 .btn-arrow {
-  font-size: 18px;
+  font-size: 17px;
   transition: transform 0.15s ease;
 }
 
@@ -245,7 +247,7 @@ onBeforeUnmount(() => {
 }
 
 .auto-advance-hint {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #94a3b8;
 }
 
@@ -273,13 +275,13 @@ onBeforeUnmount(() => {
 /* Lawyer gently sways/dances across the stage */
 @keyframes lawyerSwayAcross {
   0% {
-    transform: translateX(-40px) rotate(-3deg);
+    transform: translateX(-28px) rotate(-3deg);
   }
   50% {
-    transform: translateX(0px) rotate(2deg) translateY(-8px);
+    transform: translateX(0px) rotate(2deg) translateY(-6px);
   }
   100% {
-    transform: translateX(40px) rotate(-3deg);
+    transform: translateX(28px) rotate(-3deg);
   }
 }
 </style>

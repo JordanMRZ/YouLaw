@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted } from 'vue'
+import DancingLawyerAvatar from './DancingLawyerAvatar.vue'
 
 const props = defineProps({
   lesson: { type: Object, required: true },
@@ -161,9 +162,12 @@ onBeforeUnmount(() => {
         <Transition name="fade-slide">
           <div v-if="answerStatus" class="feedback-panel" :class="answerStatus">
             <div class="feedback-info">
-              <div class="feedback-icon-box">
-                <span v-if="answerStatus === 'correct'">✨</span>
-                <span v-else>💡</span>
+              <div class="feedback-lawyer-avatar-wrapper" aria-hidden="true">
+                <DancingLawyerAvatar
+                  :mode="answerStatus"
+                  size="mini"
+                  :show-bubble="false"
+                />
               </div>
               <div class="feedback-text-content">
                 <strong class="feedback-title">
@@ -488,16 +492,14 @@ onBeforeUnmount(() => {
   gap: 12px;
 }
 
-.feedback-icon-box {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-size: 20px;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+.feedback-lawyer-avatar-wrapper {
+  width: 76px;
+  height: 94px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .feedback-text-content {
