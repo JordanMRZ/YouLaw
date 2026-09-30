@@ -1,6 +1,6 @@
 import { Sparkles } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useRef, type ReactNode } from 'react'
+import { useMemo, useRef, type ReactNode } from 'react'
 import type { Group } from 'three'
 import { WorldLabel } from '../components/WorldLabel'
 import type {
@@ -13,7 +13,7 @@ import type {
   Vec3,
 } from '../data/types'
 import { PlayerVisual } from '../player/PlayerVisual'
-import { fanBlowDirection } from '../game/fanWind'
+import { fanBlowQuaternion } from '../game/fanWind'
 import { useGameStore } from '../store/gameStore'
 import { selectionKey, useEditorStore } from '../store/editorStore'
 
@@ -278,9 +278,8 @@ function HammerVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) 
 function FanVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) {
   const blades = useRef<Group>(null)
   const speed = def.speed ?? 1
-  const [bx, by, bz] = fanBlowDirection(def)
-  const yaw = Math.atan2(bx, bz)
-  const pitch = -Math.asin(Math.max(-1, Math.min(1, by)))
+  const blow = def.fanBlow ?? ([1, 0, 0] as const)
+  const arrowQuat = useMemo(() => fanBlowQuaternion(def), [blow[0], blow[1], blow[2]])
   useFrame((state) => {
     if (!blades.current) return
     blades.current.rotation.z = preview ? state.clock.elapsedTime * speed * 6 : 0.4
@@ -297,12 +296,12 @@ function FanVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) {
           <meshLambertMaterial color="#90e0ef" />
         </mesh>
       </group>
-      <group position={[0, 0.35, 0]} rotation={[pitch, yaw, 0]}>
-        <mesh position={[0.9, 0, 0]}>
-          <boxGeometry args={[1.6, 0.08, 0.08]} />
+      <group position={[0, 0.35, 0]} quaternion={arrowQuat}>
+        <mesh position={[0.75, 0, 0]}>
+          <boxGeometry args={[1.5, 0.08, 0.08]} />
           <meshLambertMaterial color="#ffd166" />
         </mesh>
-        <mesh position={[1.65, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+        <mesh position={[1.55, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
           <coneGeometry args={[0.18, 0.35, 8]} />
           <meshLambertMaterial color="#ffd166" />
         </mesh>
