@@ -5,7 +5,7 @@ import type { RapierRigidBody } from '@react-three/rapier'
 import { Group } from 'three'
 import { audio } from '../audio/audioManager'
 import type { LevelDef } from '../data/types'
-import { GROUND_WIND_SLIDE } from '../game/fanWind'
+import { GROUND_WIND_SLIDE, GROUND_WIND_TARGET_SPEED } from '../game/fanWind'
 import { playerRuntime } from '../game/runtime'
 import { useGameStore } from '../store/gameStore'
 import { PlayerVisual } from './PlayerVisual'
@@ -132,23 +132,29 @@ export function Player({ level }: { level: LevelDef }) {
     }
 
     const control = grounded ? 1 : AIR_CONTROL
-    const targetX = ix * speed * control + playerRuntime.platformVelocity.x
-    const targetZ = iz * speed * control + playerRuntime.platformVelocity.z
+    let targetX = ix * speed * control + playerRuntime.platformVelocity.x
+    let targetZ = iz * speed * control + playerRuntime.platformVelocity.z
+
+    const windActive = Math.hypot(windX, windZ) > 1e-5 || Math.abs(windY) > 1e-5
+    if (windActive && grounded) {
+      const wMag = Math.hypot(windX, windZ)
+      if (wMag > 1e-5) {
+        const push = GROUND_WIND_TARGET_SPEED * Math.min(2.2, wMag * 40)
+        targetX += (windX / wMag) * push
+        targetZ += (windZ / wMag) * push
+      }
+    }
+
     let nextX = vel.x + (targetX - vel.x) * Math.min(1, dt * 12)
     let nextZ = vel.z + (targetZ - vel.z) * Math.min(1, dt * 12)
     let nextY = vel.y
 
-    const windActive = Math.hypot(windX, windZ) > 1e-5 || Math.abs(windY) > 1e-5
     if (windActive) {
-      const windHoriz = Math.hypot(windX, windZ)
-      const groundSlide = GROUND_WIND_SLIDE * (windHoriz > Math.abs(windY) ? 1.45 : 1)
       if (grounded) {
-        const tx = origin.x + windX * groundSlide * dt
-        const ty = origin.y + windY * groundSlide * dt
-        const tz = origin.z + windZ * groundSlide * dt
+        const tx = origin.x + windX * GROUND_WIND_SLIDE * dt * 0.25
+        const ty = origin.y + windY * GROUND_WIND_SLIDE * dt * 0.25
+        const tz = origin.z + windZ * GROUND_WIND_SLIDE * dt * 0.25
         body.setTranslation({ x: tx, y: ty, z: tz }, true)
-        nextX += windX * groundSlide * 0.55
-        nextZ += windZ * groundSlide * 0.55
         nextY += windY * 6
       } else {
         nextX += windX * 12

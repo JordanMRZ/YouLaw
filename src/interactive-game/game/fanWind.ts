@@ -97,7 +97,17 @@ export function isInFanWindZone(
 }
 
 /** Aprox. pies respecto al centro del capsule (mejor detección en suelo). */
-export const FAN_ZONE_FEET_OFFSET = 0.78
+export const FAN_ZONE_FEET_OFFSET = 0.82
+
+/** Velocidad objetivo del empuje en suelo (se suma al teclado). */
+export const GROUND_WIND_TARGET_SPEED = 11.5
+
+export function isPlayerInFanWindZone(def: ObstacleDef, px: number, py: number, pz: number): boolean {
+  return (
+    isInFanWindZone(def, px, py, pz, 0) ||
+    isInFanWindZone(def, px, py, pz, FAN_ZONE_FEET_OFFSET)
+  )
+}
 
 export function fanWindImpulse(def: ObstacleDef): Vec3 {
   const [dx, dy, dz] = fanBlowDirection(def)
