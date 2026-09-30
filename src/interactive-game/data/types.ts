@@ -92,8 +92,12 @@ export interface ObstacleDef {
   fanBlow?: Vec3
   /** Ventilador: intensidad del viento (independiente de la rotación de aspas). */
   fanForce?: number
-  /** Ventilador: radio horizontal de efecto (metros en XZ). */
+  /** Ventilador: radio horizontal legacy (usa fanReach si falta). */
   fanRadius?: number
+  /** Ventilador: distancia máxima del empuje en la dirección del viento. */
+  fanReach?: number
+  /** Ventilador: mitad del ancho lateral del túnel de viento. */
+  fanSpread?: number
   /** Ventilador: alcance vertical arriba/abajo desde el centro (metros). */
   fanHeight?: number
   color?: string

@@ -701,15 +701,21 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
             onChange={(fanForce) => patch({ fanForce })}
           />
           <NumField
-            label="Radio (horizontal)"
-            value={obstacle.fanRadius ?? 3.4}
-            onChange={(fanRadius) => patch({ fanRadius })}
+            label="Alcance (adelante)"
+            value={obstacle.fanReach ?? obstacle.fanRadius ?? 8}
+            onChange={(fanReach) => patch({ fanReach })}
+          />
+          <NumField
+            label="Ancho (lateral)"
+            value={obstacle.fanSpread ?? 2.6}
+            onChange={(fanSpread) => patch({ fanSpread })}
           />
           <NumField
             label="Altura (arriba/abajo)"
             value={obstacle.fanHeight ?? 2.8}
             onChange={(fanHeight) => patch({ fanHeight })}
           />
+          <p className="muted">El viento sale del ventilador en la dirección de la flecha, no en círculo a su alrededor.</p>
         </>
       )}
       {obstacle.kind === 'movingBlock' && (

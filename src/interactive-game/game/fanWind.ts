@@ -34,12 +34,28 @@ const BASE_IMPULSE = 0.18
 /** Escala al deslizar en suelo (multiplica fanWindImpulse × dt en Player). */
 export const GROUND_WIND_SLIDE = 58
 
-export const DEFAULT_FAN_RADIUS = 3.4
+export const DEFAULT_FAN_REACH = 8
+export const DEFAULT_FAN_SPREAD = 2.6
 export const DEFAULT_FAN_HEIGHT = 2.8
 
+/** @deprecated Usar fanReach; se mantiene como respaldo. */
 export function fanRadius(def: ObstacleDef): number {
-  const value = def.fanRadius
-  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : DEFAULT_FAN_RADIUS
+  return fanReach(def)
+}
+
+export function fanReach(def: ObstacleDef): number {
+  if (typeof def.fanReach === 'number' && Number.isFinite(def.fanReach) && def.fanReach > 0) {
+    return def.fanReach
+  }
+  if (typeof def.fanRadius === 'number' && Number.isFinite(def.fanRadius) && def.fanRadius > 0) {
+    return Math.max(def.fanRadius, 4)
+  }
+  return DEFAULT_FAN_REACH
+}
+
+export function fanSpread(def: ObstacleDef): number {
+  const value = def.fanSpread
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : DEFAULT_FAN_SPREAD
 }
 
 export function fanHeightHalf(def: ObstacleDef): number {
@@ -47,11 +63,27 @@ export function fanHeightHalf(def: ObstacleDef): number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : DEFAULT_FAN_HEIGHT
 }
 
+/** Túnel de viento: sale del ventilador solo hacia adelante (fanBlow). */
 export function isInFanWindZone(def: ObstacleDef, px: number, py: number, pz: number): boolean {
-  const dx = px - def.position[0]
-  const dz = pz - def.position[2]
-  const dy = py - def.position[1]
-  return Math.hypot(dx, dz) < fanRadius(def) && dy > -fanHeightHalf(def) && dy < fanHeightHalf(def)
+  const [bx, by, bz] = fanBlowDirection(def)
+  const ox = px - def.position[0]
+  const oy = py - def.position[1]
+  const oz = pz - def.position[2]
+
+  const along = ox * bx + oy * by + oz * bz
+  const reach = fanReach(def)
+  const start = -0.45
+  if (along < start || along > reach) return false
+
+  const axisX = bx * along
+  const axisY = by * along
+  const axisZ = bz * along
+  const perp = Math.hypot(ox - axisX, oy - axisY, oz - axisZ)
+  if (perp > fanSpread(def)) return false
+
+  if (Math.abs(oy) > fanHeightHalf(def)) return false
+
+  return true
 }
 
 export function fanWindImpulse(def: ObstacleDef): Vec3 {
