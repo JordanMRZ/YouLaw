@@ -31,6 +31,9 @@ export function fanWindForce(def: ObstacleDef): number {
 
 const BASE_IMPULSE = 0.18
 
+/** Escala al deslizar en suelo (multiplica fanWindImpulse × dt en Player). */
+export const GROUND_WIND_SLIDE = 58
+
 export function fanWindImpulse(def: ObstacleDef): Vec3 {
   const [dx, dy, dz] = fanBlowDirection(def)
   const force = fanWindForce(def)

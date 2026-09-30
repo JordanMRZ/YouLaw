@@ -5,6 +5,7 @@ import type { RapierRigidBody } from '@react-three/rapier'
 import { Group } from 'three'
 import { audio } from '../audio/audioManager'
 import type { LevelDef } from '../data/types'
+import { GROUND_WIND_SLIDE } from '../game/fanWind'
 import { playerRuntime } from '../game/runtime'
 import { useGameStore } from '../store/gameStore'
 import { PlayerVisual } from './PlayerVisual'
@@ -131,11 +132,28 @@ export function Player({ level }: { level: LevelDef }) {
     }
 
     const control = grounded ? 1 : AIR_CONTROL
-    const targetX = ix * speed * control + playerRuntime.platformVelocity.x + windX
-    const targetZ = iz * speed * control + playerRuntime.platformVelocity.z + windZ
-    const nextX = vel.x + (targetX - vel.x) * Math.min(1, dt * 12)
-    const nextZ = vel.z + (targetZ - vel.z) * Math.min(1, dt * 12)
-    let nextY = vel.y + windY
+    const targetX = ix * speed * control + playerRuntime.platformVelocity.x
+    const targetZ = iz * speed * control + playerRuntime.platformVelocity.z
+    let nextX = vel.x + (targetX - vel.x) * Math.min(1, dt * 12)
+    let nextZ = vel.z + (targetZ - vel.z) * Math.min(1, dt * 12)
+    let nextY = vel.y
+
+    const windActive = Math.hypot(windX, windZ) > 1e-5 || Math.abs(windY) > 1e-5
+    if (windActive) {
+      if (grounded) {
+        const tx = origin.x + windX * GROUND_WIND_SLIDE * dt
+        const ty = origin.y + windY * GROUND_WIND_SLIDE * dt
+        const tz = origin.z + windZ * GROUND_WIND_SLIDE * dt
+        body.setTranslation({ x: tx, y: ty, z: tz }, true)
+        nextX += windX * 14
+        nextZ += windZ * 14
+        nextY += windY * 6
+      } else {
+        nextX += windX * 12
+        nextZ += windZ * 12
+        nextY += windY * 8
+      }
+    }
 
     if (!stunned && jumpBuffer.current > 0 && coyote.current > 0) {
       nextY = JUMP_VEL

@@ -76,7 +76,8 @@ function Fan({ def }: { def: ObstacleDef }) {
     const p = playerRuntime.position
     const dx = p.x - def.position[0]
     const dz = p.z - def.position[2]
-    if (Math.hypot(dx, dz) < 3.4 && Math.abs(p.y - def.position[1]) < 2.2) {
+    const dy = p.y - def.position[1]
+    if (Math.hypot(dx, dz) < 3.4 && dy > -2.8 && dy < 2.8) {
       const [ix, iy, iz] = fanWindImpulse(def)
       playerRuntime.windForce.x += ix
       playerRuntime.windForce.y += iy
