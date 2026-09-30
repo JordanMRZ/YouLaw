@@ -700,6 +700,16 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
             value={obstacle.fanForce ?? obstacle.speed ?? 1}
             onChange={(fanForce) => patch({ fanForce })}
           />
+          <NumField
+            label="Radio (horizontal)"
+            value={obstacle.fanRadius ?? 3.4}
+            onChange={(fanRadius) => patch({ fanRadius })}
+          />
+          <NumField
+            label="Altura (arriba/abajo)"
+            value={obstacle.fanHeight ?? 2.8}
+            onChange={(fanHeight) => patch({ fanHeight })}
+          />
         </>
       )}
       {obstacle.kind === 'movingBlock' && (

@@ -34,6 +34,26 @@ const BASE_IMPULSE = 0.18
 /** Escala al deslizar en suelo (multiplica fanWindImpulse × dt en Player). */
 export const GROUND_WIND_SLIDE = 58
 
+export const DEFAULT_FAN_RADIUS = 3.4
+export const DEFAULT_FAN_HEIGHT = 2.8
+
+export function fanRadius(def: ObstacleDef): number {
+  const value = def.fanRadius
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : DEFAULT_FAN_RADIUS
+}
+
+export function fanHeightHalf(def: ObstacleDef): number {
+  const value = def.fanHeight
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : DEFAULT_FAN_HEIGHT
+}
+
+export function isInFanWindZone(def: ObstacleDef, px: number, py: number, pz: number): boolean {
+  const dx = px - def.position[0]
+  const dz = pz - def.position[2]
+  const dy = py - def.position[1]
+  return Math.hypot(dx, dz) < fanRadius(def) && dy > -fanHeightHalf(def) && dy < fanHeightHalf(def)
+}
+
 export function fanWindImpulse(def: ObstacleDef): Vec3 {
   const [dx, dy, dz] = fanBlowDirection(def)
   const force = fanWindForce(def)

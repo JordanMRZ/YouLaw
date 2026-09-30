@@ -13,7 +13,7 @@ import type {
   Vec3,
 } from '../data/types'
 import { PlayerVisual } from '../player/PlayerVisual'
-import { fanBlowQuaternion } from '../game/fanWind'
+import { fanBlowQuaternion, fanHeightHalf, fanRadius } from '../game/fanWind'
 import { useGameStore } from '../store/gameStore'
 import { selectionKey, useEditorStore } from '../store/editorStore'
 
@@ -280,6 +280,8 @@ function FanVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) {
   const speed = def.speed ?? 1
   const blow = def.fanBlow ?? ([1, 0, 0] as const)
   const arrowQuat = useMemo(() => fanBlowQuaternion(def), [blow[0], blow[1], blow[2]])
+  const radius = fanRadius(def)
+  const height = fanHeightHalf(def)
   useFrame((state) => {
     if (!blades.current) return
     blades.current.rotation.z = preview ? state.clock.elapsedTime * speed * 6 : 0.4
@@ -296,6 +298,14 @@ function FanVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) {
           <meshLambertMaterial color="#90e0ef" />
         </mesh>
       </group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[radius * 0.92, radius, 48]} />
+        <meshBasicMaterial color="#ffd166" transparent opacity={0.35} depthWrite={false} />
+      </mesh>
+      <mesh>
+        <cylinderGeometry args={[radius, radius, height * 2, 32, 1, true]} />
+        <meshBasicMaterial color="#9ad7ff" transparent opacity={0.08} depthWrite={false} wireframe />
+      </mesh>
       <group position={[0, 0.35, 0]} quaternion={arrowQuat}>
         <mesh position={[0.75, 0, 0]}>
           <boxGeometry args={[1.5, 0.08, 0.08]} />
