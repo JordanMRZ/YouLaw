@@ -694,7 +694,7 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
             value={obstacle.fanBlow ?? [1, 0, 0]}
             onChange={(fanBlow) => patch({ fanBlow })}
           />
-          <p className="muted">Ej.: [1,0,0] empuja hacia +X · [0,0,-1] hacia atrás en el recorrido.</p>
+          <p className="muted">Ejes del nivel: X lateral · Z adelante (W). Ej.: [0,0,1] empuja hacia delante · [0,0,-1] hacia atrás.</p>
           <NumField
             label="Fuerza del viento"
             value={obstacle.fanForce ?? obstacle.speed ?? 1}

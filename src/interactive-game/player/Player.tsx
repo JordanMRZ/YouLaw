@@ -66,14 +66,21 @@ export function Player({ level }: { level: LevelDef }) {
 
     if (phase === 'results' || phase === 'credits') {
       playerRuntime.anim = 'victory'
+      playerRuntime.windForce.set(0, 0, 0)
       body.setLinvel({ x: 0, y: vel.y, z: 0 }, true)
       return
     }
     if (phase !== 'play') {
       playerRuntime.anim = 'idle'
+      playerRuntime.windForce.set(0, 0, 0)
       body.setLinvel({ x: 0, y: 0, z: 0 }, true)
       return
     }
+
+    const windX = playerRuntime.windForce.x
+    const windY = playerRuntime.windForce.y
+    const windZ = playerRuntime.windForce.z
+    playerRuntime.windForce.set(0, 0, 0)
 
     const ray = new rapier.Ray({ x: origin.x, y: origin.y + 0.35, z: origin.z }, { x: 0, y: -1, z: 0 })
     const hit = world.castRay(ray, 0.55, false, undefined, undefined, undefined, body, (collider) => !collider.isSensor())
@@ -124,11 +131,11 @@ export function Player({ level }: { level: LevelDef }) {
     }
 
     const control = grounded ? 1 : AIR_CONTROL
-    const targetX = ix * speed * control + playerRuntime.platformVelocity.x
-    const targetZ = iz * speed * control + playerRuntime.platformVelocity.z
+    const targetX = ix * speed * control + playerRuntime.platformVelocity.x + windX
+    const targetZ = iz * speed * control + playerRuntime.platformVelocity.z + windZ
     const nextX = vel.x + (targetX - vel.x) * Math.min(1, dt * 12)
     const nextZ = vel.z + (targetZ - vel.z) * Math.min(1, dt * 12)
-    let nextY = vel.y
+    let nextY = vel.y + windY
 
     if (!stunned && jumpBuffer.current > 0 && coyote.current > 0) {
       nextY = JUMP_VEL

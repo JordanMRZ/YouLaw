@@ -78,9 +78,12 @@ function Fan({ def }: { def: ObstacleDef }) {
     const dz = p.z - def.position[2]
     if (Math.hypot(dx, dz) < 3.4 && Math.abs(p.y - def.position[1]) < 2.2) {
       const [ix, iy, iz] = fanWindImpulse(def)
-      playerRuntime.applyImpulse(ix, iy, iz)
+      playerRuntime.windForce.x += ix
+      playerRuntime.windForce.y += iy
+      playerRuntime.windForce.z += iz
     }
-  })
+  }, -1)
+
   return (
     <RigidBody ref={blades} type="kinematicPosition" position={def.position} colliders={false} sensor>
       <CuboidCollider args={[1.3, 0.08, 0.22]} />

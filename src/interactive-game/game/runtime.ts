@@ -11,6 +11,8 @@ export const playerRuntime = {
   ready: false,
   invulnerableUntil: 0,
   platformVelocity: new Vector3(),
+  /** Fuerza de ventiladores acumulada en el frame (prioridad useFrame -1). */
+  windForce: new Vector3(),
   respawn: () => {},
   applyImpulse: (_x: number, _y: number, _z: number) => {},
   bounce: (_strength: number) => {},
