@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { audio } from '../audio/audioManager'
 import {
   firstLevelOfWorld,
+  isLevelLocked,
   isWorldLocked,
   lastLevelOfWorld,
   worldIndexForLevel,
@@ -166,6 +167,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   startLevel: (id, opts) => {
     const fromEditor = opts?.fromEditor ?? get().editorReturn
+    if (!fromEditor && isLevelLocked(id, get().teacherEnglishLevel)) return
     unloadLevel(id)
     const level = getLevel(id)
     audio.unlock()
@@ -247,14 +249,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ selectedLevel: next })
   },
   enterSelectedWorld: () => {
-    const { selectedWorld, selectedLevel, save, teacherEnglishLevel } = get()
+    const { selectedWorld, selectedLevel, teacherEnglishLevel } = get()
     if (isWorldLocked(selectedWorld, teacherEnglishLevel)) return
     const first = firstLevelOfWorld(selectedWorld)
     const lastLevel = lastLevelOfWorld(selectedWorld)
     const inWorld = selectedLevel >= first && selectedLevel <= lastLevel
     set({
       hubLayer: 'world',
-      selectedLevel: inWorld && selectedLevel <= save.unlockedLevel ? selectedLevel : first,
+      selectedLevel:
+        inWorld && !isLevelLocked(selectedLevel, teacherEnglishLevel) ? selectedLevel : first,
     })
   },
   exitWorldToGalaxy: () => set({ hubLayer: 'galaxy' }),

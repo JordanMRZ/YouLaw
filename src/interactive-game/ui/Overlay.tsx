@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { audio } from '../audio/audioManager'
 import { getLevel, LEVEL_COUNT, levelCatalog, WORLD_COUNT, worldOrder } from '../data/levels'
-import { firstLevelOfWorld, isWorldLocked, lastLevelOfWorld } from '../data/hubLayout'
+import { firstLevelOfWorld, isLevelLocked, isWorldLocked, lastLevelOfWorld } from '../data/hubLayout'
 import { cefrForWorldIndex, worldMeta } from '../data/worlds'
 import { formatTime } from '../game/scoring'
 import { useEditorStore } from '../store/editorStore'
@@ -66,7 +66,7 @@ export function Overlay() {
             state.enterSelectedWorld()
             return
           }
-          if (state.selectedLevel <= state.save.unlockedLevel) {
+          if (!isLevelLocked(state.selectedLevel, state.teacherEnglishLevel)) {
             audio.unlock()
             audio.startMusic()
             state.startLevel(state.selectedLevel)
@@ -105,7 +105,7 @@ function HubChrome() {
   const record = save.levels[String(selected)]
   const teacherEnglishLevel = useGameStore((s) => s.teacherEnglishLevel)
   const worldLocked = isWorldLocked(selectedWorld, teacherEnglishLevel)
-  const levelLocked = selected > save.unlockedLevel
+  const levelLocked = isLevelLocked(selected, teacherEnglishLevel)
   const showEditor = useGameStore((s) => s.canOpenEditor)
   const worldTitle = worldMeta[worldOrder[selectedWorld]]?.title ?? meta?.hubLabel
   const canGoPrev = hubLayer === 'galaxy' ? selectedWorld > 0 : selected > firstLevelOfWorld(selectedWorld)

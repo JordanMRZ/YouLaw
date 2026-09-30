@@ -4,6 +4,7 @@ import { Group } from 'three'
 import {
   PLANET_SPACING,
   firstLevelOfWorld,
+  isLevelLocked,
   isWorldLocked,
   planetPosition,
 } from '../data/hubLayout'
@@ -19,7 +20,6 @@ export function HubWorld() {
   const selectedLevel = useGameStore((s) => s.selectedLevel)
   const selectedWorld = useGameStore((s) => s.selectedWorld)
   const hubLayer = useGameStore((s) => s.hubLayer)
-  const unlocked = useGameStore((s) => s.save.unlockedLevel)
   const teacherEnglishLevel = useGameStore((s) => s.teacherEnglishLevel)
   const equipped = useGameStore((s) => s.save.cosmetics)
   const preview = useGameStore((s) => s.shopPreview)
@@ -56,7 +56,7 @@ export function HubWorld() {
                   localIndex={localIndex}
                   world={world}
                   selected={selectedLevel === id}
-                  locked={id > unlocked}
+                  locked={isLevelLocked(id, teacherEnglishLevel)}
                   starCount={stars[String(id)]?.stars ?? 0}
                 />
               </group>

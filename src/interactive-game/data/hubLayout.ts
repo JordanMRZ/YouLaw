@@ -28,6 +28,10 @@ export function isWorldLocked(worldIndex: number, teacherEnglishLevel: CefrLevel
   return requiredRank > teacherRank
 }
 
+export function isLevelLocked(levelId: number, teacherEnglishLevel: CefrLevel | null | undefined) {
+  return isWorldLocked(worldIndexForLevel(levelId), teacherEnglishLevel)
+}
+
 export function clampWorldIndex(index: number) {
   return Math.min(WORLD_COUNT - 1, Math.max(0, index))
 }

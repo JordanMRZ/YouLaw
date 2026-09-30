@@ -204,9 +204,9 @@ Al cargar entras al **hub** espacial:
 2. Elige un mundo con **Entrar** (si no está bloqueado).
 3. **Vista mundo**: recorre niveles con **‹ ›** o flechas del teclado (**A/D** o izquierda/derecha en hub).
 4. Panel inferior: nombre del nivel, subtítulo, **estrellas** conseguidas, mejor tiempo.
-5. **Jugar** inicia el nivel seleccionado (solo si está desbloqueado).
+5. **Jugar** inicia el nivel seleccionado (solo si tu nivel CEFR lo permite).
 
-**Desbloqueo de mundos:** cada planeta tiene un nivel de inglés CEFR (A1–C1). Se desbloquean todos los mundos cuyo nivel sea **igual o inferior** al de tu evaluación en YouLaw (por ejemplo, con **B1** quedan abiertos los mundos A1, A2 y B1). Sin evaluación completada se asume **A1**. Los niveles **dentro** de un mundo siguen desbloqueándose al completar el recorrido del juego.
+**Desbloqueo de mundos y niveles:** cada planeta tiene un nivel de inglés CEFR (A1–C1). Se desbloquean **todos los mundos y todos los niveles (1–5) dentro de cada mundo** cuyo CEFR sea **igual o inferior** al de tu evaluación en YouLaw (por ejemplo, con **B1** quedan abiertos los mundos A1, A2 y B1 y sus **30 niveles**). Sin evaluación completada se asume **A1** (mundos y niveles 1–10). Completar un nivel sigue guardando estrellas, tiempos y progreso en tu partida.
 
 #### Mundos (contenido orientativo)
 
