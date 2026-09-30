@@ -147,14 +147,8 @@ export function Player({ level }: { level: LevelDef }) {
         const ty = origin.y + windY * groundSlide * dt
         const tz = origin.z + windZ * groundSlide * dt
         body.setTranslation({ x: tx, y: ty, z: tz }, true)
-        if (windHoriz > 1e-4) {
-          const push = windHoriz * groundSlide * 0.95
-          nextX = (windX / windHoriz) * push + playerRuntime.platformVelocity.x * 0.25
-          nextZ = (windZ / windHoriz) * push + playerRuntime.platformVelocity.z * 0.25
-        } else {
-          nextX += windX * 14
-          nextZ += windZ * 14
-        }
+        nextX += windX * groundSlide * 0.55
+        nextZ += windZ * groundSlide * 0.55
         nextY += windY * 6
       } else {
         nextX += windX * 12
