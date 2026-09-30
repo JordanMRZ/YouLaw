@@ -707,7 +707,7 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
           />
           <NumField
             label="Ancho (lateral)"
-            value={obstacle.fanSpread ?? 2.6}
+            value={obstacle.fanSpread ?? 5.5}
             onChange={(fanSpread) => patch({ fanSpread })}
           />
           <NumField
@@ -715,7 +715,10 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
             value={obstacle.fanHeight ?? 2.8}
             onChange={(fanHeight) => patch({ fanHeight })}
           />
-          <p className="muted">El viento sale del ventilador en la dirección de la flecha, no en círculo a su alrededor.</p>
+          <p className="muted">
+            Ancho = apertura lateral del túnel (si soplas a un lado, sube el ancho para cubrir el camino). El viento sale en la
+            dirección de la flecha.
+          </p>
         </>
       )}
       {obstacle.kind === 'movingBlock' && (

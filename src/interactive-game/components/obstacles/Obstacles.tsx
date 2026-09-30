@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import type { RapierRigidBody } from '@react-three/rapier'
 import { Euler, Quaternion } from 'three'
 import type { ObstacleDef } from '../../data/types'
-import { fanWindImpulse, isInFanWindZone } from '../../game/fanWind'
+import { fanWindImpulse, isInFanWindZone, FAN_ZONE_FEET_OFFSET } from '../../game/fanWind'
 import { playerRuntime } from '../../game/runtime'
 
 const quat = new Quaternion()
@@ -74,7 +74,7 @@ function Fan({ def }: { def: ObstacleDef }) {
     quat.setFromEuler(euler)
     blades.current?.setNextKinematicRotation(quat)
     const p = playerRuntime.position
-    if (isInFanWindZone(def, p.x, p.y, p.z)) {
+    if (isInFanWindZone(def, p.x, p.y, p.z, FAN_ZONE_FEET_OFFSET)) {
       const [ix, iy, iz] = fanWindImpulse(def)
       playerRuntime.windForce.x += ix
       playerRuntime.windForce.y += iy

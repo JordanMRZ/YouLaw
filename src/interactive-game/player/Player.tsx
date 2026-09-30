@@ -140,13 +140,21 @@ export function Player({ level }: { level: LevelDef }) {
 
     const windActive = Math.hypot(windX, windZ) > 1e-5 || Math.abs(windY) > 1e-5
     if (windActive) {
+      const windHoriz = Math.hypot(windX, windZ)
+      const groundSlide = GROUND_WIND_SLIDE * (windHoriz > Math.abs(windY) ? 1.45 : 1)
       if (grounded) {
-        const tx = origin.x + windX * GROUND_WIND_SLIDE * dt
-        const ty = origin.y + windY * GROUND_WIND_SLIDE * dt
-        const tz = origin.z + windZ * GROUND_WIND_SLIDE * dt
+        const tx = origin.x + windX * groundSlide * dt
+        const ty = origin.y + windY * groundSlide * dt
+        const tz = origin.z + windZ * groundSlide * dt
         body.setTranslation({ x: tx, y: ty, z: tz }, true)
-        nextX += windX * 14
-        nextZ += windZ * 14
+        if (windHoriz > 1e-4) {
+          const push = windHoriz * groundSlide * 0.95
+          nextX = (windX / windHoriz) * push + playerRuntime.platformVelocity.x * 0.25
+          nextZ = (windZ / windHoriz) * push + playerRuntime.platformVelocity.z * 0.25
+        } else {
+          nextX += windX * 14
+          nextZ += windZ * 14
+        }
         nextY += windY * 6
       } else {
         nextX += windX * 12

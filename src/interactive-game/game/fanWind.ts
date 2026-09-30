@@ -35,7 +35,7 @@ const BASE_IMPULSE = 0.18
 export const GROUND_WIND_SLIDE = 58
 
 export const DEFAULT_FAN_REACH = 8
-export const DEFAULT_FAN_SPREAD = 2.6
+export const DEFAULT_FAN_SPREAD = 5.5
 export const DEFAULT_FAN_HEIGHT = 2.8
 
 /** @deprecated Usar fanReach; se mantiene como respaldo. */
@@ -64,27 +64,40 @@ export function fanHeightHalf(def: ObstacleDef): number {
 }
 
 /** Túnel de viento: sale del ventilador solo hacia adelante (fanBlow). */
-export function isInFanWindZone(def: ObstacleDef, px: number, py: number, pz: number): boolean {
+export function isInFanWindZone(
+  def: ObstacleDef,
+  px: number,
+  py: number,
+  pz: number,
+  feetBelowCenter = 0,
+): boolean {
   const [bx, by, bz] = fanBlowDirection(def)
   const ox = px - def.position[0]
-  const oy = py - def.position[1]
+  const oy = py - def.position[1] - feetBelowCenter
   const oz = pz - def.position[2]
+
+  if (Math.abs(oy) > fanHeightHalf(def)) return false
 
   const along = ox * bx + oy * by + oz * bz
   const reach = fanReach(def)
   const start = -0.45
   if (along < start || along > reach) return false
 
-  const axisX = bx * along
-  const axisY = by * along
-  const axisZ = bz * along
-  const perp = Math.hypot(ox - axisX, oy - axisY, oz - axisZ)
-  if (perp > fanSpread(def)) return false
+  const spread = fanSpread(def)
+  const horizLen = Math.hypot(bx, bz)
 
-  if (Math.abs(oy) > fanHeightHalf(def)) return false
+  if (horizLen < 0.2) {
+    if (Math.hypot(ox, oz) > spread) return false
+  } else {
+    const horizCross = Math.abs(ox * bz - oz * bx)
+    if (horizCross > spread) return false
+  }
 
   return true
 }
+
+/** Aprox. pies respecto al centro del capsule (mejor detección en suelo). */
+export const FAN_ZONE_FEET_OFFSET = 0.78
 
 export function fanWindImpulse(def: ObstacleDef): Vec3 {
   const [dx, dy, dz] = fanBlowDirection(def)

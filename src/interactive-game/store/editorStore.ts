@@ -606,7 +606,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         obstacle.fanBlow = [1, 0, 0]
         obstacle.fanForce = 1
         obstacle.fanReach = 8
-        obstacle.fanSpread = 2.6
+        obstacle.fanSpread = 5.5
         obstacle.fanHeight = 2.8
       }
       if (kind === 'movingBlock') {
