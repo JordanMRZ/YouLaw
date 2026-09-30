@@ -11,6 +11,7 @@ import { getLevel, LEVEL_COUNT, WORLD_COUNT, unloadLevel } from '../data/levels'
 import { itemById } from '../data/shop'
 import { loadSave, persistSave } from '../data/storage'
 import type { Cosmetics, GamePhase, RunResults, SaveData, Vec3 } from '../data/types'
+import type { CefrLevel } from '../data/worlds'
 import { explainMistake, type MissReason } from '../game/explain'
 import { playerRuntime } from '../game/runtime'
 import { computeResults } from '../game/scoring'
@@ -56,8 +57,10 @@ interface GameState {
   burst: { at: Vec3; kind: 'correct' | 'wrong' | 'checkpoint' | 'goal' | 'coin' } | null
   editorReturn: boolean
   canOpenEditor: boolean
+  teacherEnglishLevel: CefrLevel | null
   reloadSaveFromStorage: () => void
   setCanOpenEditor: (open: boolean) => void
+  setTeacherEnglishLevel: (level: CefrLevel | null) => void
   startLevel: (id: number, opts?: { fromEditor?: boolean }) => void
   backToHub: () => void
   setPhase: (phase: GamePhase) => void
@@ -139,6 +142,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   burst: null,
   editorReturn: false,
   canOpenEditor: false,
+  teacherEnglishLevel: null,
 
   reloadSaveFromStorage: () => {
     const save = loadSave()
@@ -158,6 +162,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setCanOpenEditor: (open) => set({ canOpenEditor: open }),
+  setTeacherEnglishLevel: (level) => set({ teacherEnglishLevel: level }),
 
   startLevel: (id, opts) => {
     const fromEditor = opts?.fromEditor ?? get().editorReturn
@@ -242,8 +247,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ selectedLevel: next })
   },
   enterSelectedWorld: () => {
-    const { selectedWorld, selectedLevel, save } = get()
-    if (isWorldLocked(selectedWorld, save.unlockedLevel)) return
+    const { selectedWorld, selectedLevel, save, teacherEnglishLevel } = get()
+    if (isWorldLocked(selectedWorld, teacherEnglishLevel)) return
     const first = firstLevelOfWorld(selectedWorld)
     const lastLevel = lastLevelOfWorld(selectedWorld)
     const inWorld = selectedLevel >= first && selectedLevel <= lastLevel

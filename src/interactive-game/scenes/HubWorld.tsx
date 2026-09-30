@@ -20,6 +20,7 @@ export function HubWorld() {
   const selectedWorld = useGameStore((s) => s.selectedWorld)
   const hubLayer = useGameStore((s) => s.hubLayer)
   const unlocked = useGameStore((s) => s.save.unlockedLevel)
+  const teacherEnglishLevel = useGameStore((s) => s.teacherEnglishLevel)
   const equipped = useGameStore((s) => s.save.cosmetics)
   const preview = useGameStore((s) => s.shopPreview)
   const cosmetics = preview ?? equipped
@@ -81,7 +82,7 @@ export function HubWorld() {
                 worldIndex={index}
                 world={item}
                 focused={selectedWorld === index}
-                locked={isWorldLocked(index, unlocked)}
+                locked={isWorldLocked(index, teacherEnglishLevel)}
                 dimmed={false}
               />
             </group>

@@ -11,6 +11,9 @@ function applyGameUserContext(userContext: Partial<GameUserContext>) {
   setGameUserContext(userContext)
   const store = useGameStore.getState()
   store.setCanOpenEditor(Boolean(userContext.canOpenEditor))
+  if (userContext.englishLevel !== undefined) {
+    store.setTeacherEnglishLevel(userContext.englishLevel ?? null)
+  }
   if (userContext.userId != null && userContext.userId !== prevId) {
     store.reloadSaveFromStorage()
   }

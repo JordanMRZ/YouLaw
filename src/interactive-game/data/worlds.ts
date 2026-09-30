@@ -1,4 +1,34 @@
 import type { LevelPalette, WorldId } from './types'
+import { worldOrder } from './levels'
+
+export type CefrLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1'
+
+export const CEFR_LEVELS: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1']
+
+export function cefrRank(level: CefrLevel | null | undefined): number {
+  if (!level) return 0
+  const index = CEFR_LEVELS.indexOf(level)
+  return index >= 0 ? index : 0
+}
+
+/** Nivel de inglés CEFR exigido para acceder a cada mundo (2 mundos por banda). */
+export const worldCefrLevel: Record<WorldId, CefrLevel> = {
+  training: 'A1',
+  'school-path': 'A1',
+  time: 'A2',
+  industrial: 'A2',
+  neon: 'B1',
+  mountain: 'B1',
+  sky: 'B2',
+  chaos: 'B2',
+  international: 'C1',
+  bridge: 'C1',
+}
+
+export function cefrForWorldIndex(worldIndex: number): CefrLevel {
+  const world = worldOrder[Math.min(worldOrder.length - 1, Math.max(0, worldIndex))] ?? 'training'
+  return worldCefrLevel[world]
+}
 
 export const worldMeta: Record<
   WorldId,

@@ -206,22 +206,22 @@ Al cargar entras al **hub** espacial:
 4. Panel inferior: nombre del nivel, subtítulo, **estrellas** conseguidas, mejor tiempo.
 5. **Jugar** inicia el nivel seleccionado (solo si está desbloqueado).
 
-**Desbloqueo:** completar un nivel desbloquea el siguiente; el progreso del juego se guarda por usuario en el navegador.
+**Desbloqueo de mundos:** cada planeta tiene un nivel de inglés CEFR (A1–C1). Se desbloquean todos los mundos cuyo nivel sea **igual o inferior** al de tu evaluación en YouLaw (por ejemplo, con **B1** quedan abiertos los mundos A1, A2 y B1). Sin evaluación completada se asume **A1**. Los niveles **dentro** de un mundo siguen desbloqueándose al completar el recorrido del juego.
 
 #### Mundos (contenido orientativo)
 
-| Mundo | Enfoque temático (inglés) |
-|-------|---------------------------|
-| Training Island | Present simple |
-| School Path | Rutina diaria |
-| Time Gardens | Preposiciones |
-| Industrial Zone | Past simple |
-| Neon City | Listening |
-| Mountain Ridge | Modales |
-| Sky Islands | Condicionales |
-| Chaos Factory | Mixto |
-| International School | Inglés de docente |
-| English Bridge | Recorrido final |
+| Mundo | Enfoque temático (inglés) | Nivel CEFR |
+|-------|---------------------------|------------|
+| Training Island | Present simple | A1 |
+| School Path | Rutina diaria | A1 |
+| Time Gardens | Preposiciones | A2 |
+| Industrial Zone | Past simple | A2 |
+| Neon City | Listening | B1 |
+| Mountain Ridge | Modales | B1 |
+| Sky Islands | Condicionales | B2 |
+| Chaos Factory | Mixto | B2 |
+| International School | Inglés de docente | C1 |
+| English Bridge | Recorrido final | C1 |
 
 ---
 

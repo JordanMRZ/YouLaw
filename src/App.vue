@@ -187,7 +187,7 @@ watch(lessonSummary, (summary) => {
     <Sidebar :active-section="activeSection" :navigation="navigation" :user="user" @navigate="navigate" @settings="showSettings = true" @logout="handleLogout" />
     <main class="main-content" :class="{ 'main-content--didactic': activeSection === 'Didactico' }">
       <TopBar v-if="activeSection !== 'Didactico'" :user-name="user?.name" :show-lives="diagnosticReady" :lives="lives" :max-lives="maxLives" :life-shake="lifeShake" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" />
-      <DidacticView v-if="activeSection === 'Didactico'" />
+      <DidacticView v-if="activeSection === 'Didactico'" :english-level="diagnosticReady ? englishLevel : null" />
       <InitialAssessmentView v-else-if="!diagnosticReady" :on-start-diagnostic="startLevelCheck" @reset="resetAllProgress" />
       <DashboardView v-else-if="activeSection === 'Inicio'" :lessons="learningLessons" :total-xp="totalXp" :diagnostic-completed="diagnosticReady" :english-level="englishLevel" :diagnostic-score="diagnosticScore" :lives="lives" :max-lives="maxLives" @select-lesson="openDashboardLesson" @show-lessons="navigate('Lecciones')" @start-diagnostic="startLevelCheck" @start-learning="scrollToLearningPath" @reassess="startLevelCheck" />
       <LessonsView v-else-if="activeSection === 'Lecciones'" :lessons="learningLessons" @select-lesson="openLibraryLesson" />

@@ -2,17 +2,28 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useAuth } from '../../composables/useAuth'
 
+const props = defineProps({
+  englishLevel: { type: String, default: null },
+})
+
+const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1']
+
 const hostEl = ref(null)
 const { user } = useAuth()
 const loadState = ref('loading')
 let teardown = null
 let bootTimeout = null
 
+function normalizedEnglishLevel() {
+  return CEFR_LEVELS.includes(props.englishLevel) ? props.englishLevel : null
+}
+
 function gameUserContext() {
   return {
     userId: user.value?.userId ?? null,
     role: user.value?.role ?? null,
     canOpenEditor: Boolean(user.value?.canUseGameEditor),
+    englishLevel: normalizedEnglishLevel(),
   }
 }
 
@@ -52,7 +63,7 @@ async function mountGame() {
 }
 
 watch(
-  () => [user.value?.userId, user.value?.canUseGameEditor],
+  () => [user.value?.userId, user.value?.canUseGameEditor, props.englishLevel],
   () => {
     if (!teardown) return
     import('../../interactive-game/mount.tsx').then(({ updateInteractiveGameUser }) => {

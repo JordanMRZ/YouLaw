@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { audio } from '../audio/audioManager'
 import { getLevel, LEVEL_COUNT, levelCatalog, WORLD_COUNT, worldOrder } from '../data/levels'
 import { firstLevelOfWorld, isWorldLocked, lastLevelOfWorld } from '../data/hubLayout'
-import { worldMeta } from '../data/worlds'
+import { cefrForWorldIndex, worldMeta } from '../data/worlds'
 import { formatTime } from '../game/scoring'
 import { useEditorStore } from '../store/editorStore'
 import { useGameStore } from '../store/gameStore'
@@ -103,7 +103,8 @@ function HubChrome() {
   const settingsOpen = useGameStore((s) => s.settingsOpen)
   const meta = levelCatalog[selected - 1]
   const record = save.levels[String(selected)]
-  const worldLocked = isWorldLocked(selectedWorld, save.unlockedLevel)
+  const teacherEnglishLevel = useGameStore((s) => s.teacherEnglishLevel)
+  const worldLocked = isWorldLocked(selectedWorld, teacherEnglishLevel)
   const levelLocked = selected > save.unlockedLevel
   const showEditor = useGameStore((s) => s.canOpenEditor)
   const worldTitle = worldMeta[worldOrder[selectedWorld]]?.title ?? meta?.hubLabel
@@ -177,6 +178,15 @@ function HubChrome() {
           <div className="hub-dock">
             <p className="kicker">{hubLayer === 'galaxy' ? 'Mundo' : worldTitle}</p>
             <h2>{hubLayer === 'galaxy' ? worldTitle : meta?.name}</h2>
+            {hubLayer === 'galaxy' && (
+              <p className="hub-sub">Inglés {cefrForWorldIndex(selectedWorld)}</p>
+            )}
+            {hubLayer === 'galaxy' && worldLocked && (
+              <p className="muted">
+                Desbloquea este mundo alcanzando {cefrForWorldIndex(selectedWorld)} en la evaluación de YouLaw
+                {teacherEnglishLevel ? ` (tu nivel: ${teacherEnglishLevel})` : ''}.
+              </p>
+            )}
             {hubLayer === 'world' && (
               <>
                 <p className="hub-sub">{meta?.subtitle}</p>

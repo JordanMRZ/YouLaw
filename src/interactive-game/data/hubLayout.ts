@@ -1,4 +1,5 @@
 import { LEVELS_PER_WORLD, WORLD_COUNT } from './levels'
+import { cefrForWorldIndex, cefrRank, type CefrLevel } from './worlds'
 
 export type HubLayer = 'galaxy' | 'world'
 
@@ -21,8 +22,10 @@ export function lastLevelOfWorld(worldIndex: number) {
   return (worldIndex + 1) * LEVELS_PER_WORLD
 }
 
-export function isWorldLocked(worldIndex: number, unlockedLevel: number) {
-  return firstLevelOfWorld(worldIndex) > unlockedLevel
+export function isWorldLocked(worldIndex: number, teacherEnglishLevel: CefrLevel | null | undefined) {
+  const requiredRank = cefrRank(cefrForWorldIndex(worldIndex))
+  const teacherRank = cefrRank(teacherEnglishLevel ?? 'A1')
+  return requiredRank > teacherRank
 }
 
 export function clampWorldIndex(index: number) {
