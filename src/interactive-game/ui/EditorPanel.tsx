@@ -665,6 +665,7 @@ function ChallengeInspector({
 }
 
 function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
+  const isFan = obstacle.kind === 'fan'
   return (
     <>
       <h3>Obstáculo</h3>
@@ -680,8 +681,30 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
       </label>
       <VecField label="Posición" value={obstacle.position} onChange={(position) => patch({ position })} />
       <VecField label="Tamaño" value={obstacle.size ?? [1.6, 1.6, 1.6]} onChange={(size) => patch({ size })} />
-      <NumField label="Velocidad" value={obstacle.speed ?? 1} onChange={(speed) => patch({ speed })} />
-      <MotionFields motion={obstacle.motion} onChange={(motion) => patch({ motion })} />
+      <NumField
+        label={isFan ? 'Velocidad aspas' : 'Velocidad'}
+        value={obstacle.speed ?? 1}
+        onChange={(speed) => patch({ speed })}
+      />
+      {isFan && (
+        <>
+          <p className="kicker">Viento</p>
+          <VecField
+            label="Dirección (x, y, z)"
+            value={obstacle.fanBlow ?? [1, 0, 0]}
+            onChange={(fanBlow) => patch({ fanBlow })}
+          />
+          <p className="muted">Ej.: [1,0,0] empuja hacia +X · [0,0,-1] hacia atrás en el recorrido.</p>
+          <NumField
+            label="Fuerza del viento"
+            value={obstacle.fanForce ?? obstacle.speed ?? 1}
+            onChange={(fanForce) => patch({ fanForce })}
+          />
+        </>
+      )}
+      {obstacle.kind === 'movingBlock' && (
+        <MotionFields motion={obstacle.motion} onChange={(motion) => patch({ motion })} />
+      )}
     </>
   )
 }

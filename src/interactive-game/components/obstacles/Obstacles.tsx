@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import type { RapierRigidBody } from '@react-three/rapier'
 import { Euler, Quaternion } from 'three'
 import type { ObstacleDef } from '../../data/types'
+import { fanWindImpulse } from '../../game/fanWind'
 import { playerRuntime } from '../../game/runtime'
 
 const quat = new Quaternion()
@@ -76,7 +77,8 @@ function Fan({ def }: { def: ObstacleDef }) {
     const dx = p.x - def.position[0]
     const dz = p.z - def.position[2]
     if (Math.hypot(dx, dz) < 3.4 && Math.abs(p.y - def.position[1]) < 2.2) {
-      playerRuntime.applyImpulse(0.18 * speed, 0.02, 0)
+      const [ix, iy, iz] = fanWindImpulse(def)
+      playerRuntime.applyImpulse(ix, iy, iz)
     }
   })
   return (

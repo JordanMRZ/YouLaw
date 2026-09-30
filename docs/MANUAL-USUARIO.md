@@ -317,7 +317,7 @@ Al completar un nivel se calcula:
 
 Si tu rol ATAV es **Director**, en el hub verás **Editor**.
 
-Permite modificar layout 3D: plataformas, preguntas, obstáculos, monedas, meta, etc.
+Permite modificar layout 3D: plataformas, preguntas, obstáculos, monedas, meta, etc. En **ventiladores**, ajusta **dirección del viento** (vector x, y, z) y **fuerza del viento** aparte de la velocidad de las aspas.
 
 | Acción | Uso |
 |--------|-----|

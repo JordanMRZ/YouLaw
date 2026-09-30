@@ -88,6 +88,10 @@ export interface ObstacleDef {
   position: Vec3
   size?: Vec3
   speed?: number
+  /** Ventilador: vector de dirección del empuje (se normaliza en juego). Por defecto +X. */
+  fanBlow?: Vec3
+  /** Ventilador: intensidad del viento (independiente de la rotación de aspas). */
+  fanForce?: number
   color?: string
   motion?: {
     axis: 'x' | 'y' | 'z'

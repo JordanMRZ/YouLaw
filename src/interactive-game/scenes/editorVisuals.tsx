@@ -13,6 +13,7 @@ import type {
   Vec3,
 } from '../data/types'
 import { PlayerVisual } from '../player/PlayerVisual'
+import { fanBlowDirection } from '../game/fanWind'
 import { useGameStore } from '../store/gameStore'
 import { selectionKey, useEditorStore } from '../store/editorStore'
 
@@ -277,20 +278,35 @@ function HammerVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) 
 function FanVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) {
   const blades = useRef<Group>(null)
   const speed = def.speed ?? 1
+  const [bx, by, bz] = fanBlowDirection(def)
+  const yaw = Math.atan2(bx, bz)
+  const pitch = -Math.asin(Math.max(-1, Math.min(1, by)))
   useFrame((state) => {
     if (!blades.current) return
     blades.current.rotation.z = preview ? state.clock.elapsedTime * speed * 6 : 0.4
   })
   return (
-    <group ref={blades}>
-      <mesh>
-        <boxGeometry args={[2.6, 0.12, 0.36]} />
-        <meshLambertMaterial color="#4cc9f0" />
-      </mesh>
-      <mesh rotation={[0, 0, Math.PI / 2]}>
-        <boxGeometry args={[2.6, 0.12, 0.36]} />
-        <meshLambertMaterial color="#90e0ef" />
-      </mesh>
+    <group>
+      <group ref={blades}>
+        <mesh>
+          <boxGeometry args={[2.6, 0.12, 0.36]} />
+          <meshLambertMaterial color="#4cc9f0" />
+        </mesh>
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <boxGeometry args={[2.6, 0.12, 0.36]} />
+          <meshLambertMaterial color="#90e0ef" />
+        </mesh>
+      </group>
+      <group position={[0, 0.35, 0]} rotation={[pitch, yaw, 0]}>
+        <mesh position={[0.9, 0, 0]}>
+          <boxGeometry args={[1.6, 0.08, 0.08]} />
+          <meshLambertMaterial color="#ffd166" />
+        </mesh>
+        <mesh position={[1.65, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          <coneGeometry args={[0.18, 0.35, 8]} />
+          <meshLambertMaterial color="#ffd166" />
+        </mesh>
+      </group>
     </group>
   )
 }

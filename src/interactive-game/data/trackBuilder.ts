@@ -154,12 +154,14 @@ export class TrackBuilder {
     return this
   }
 
-  fan(offsetX = 0, speed = 1) {
+  fan(offsetX = 0, speed = 1, blow: Vec3 = [1, 0, 0], force = speed) {
     this.obstacles.push({
       id: this.id('fn'),
       kind: 'fan',
       position: [this.x + offsetX, this.y + 1.4, this.z + 1],
       speed,
+      fanBlow: blow,
+      fanForce: force,
       size: [2.4, 2.2, 2.4],
     })
     return this
