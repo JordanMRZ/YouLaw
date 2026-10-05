@@ -16,6 +16,8 @@ import { createLevel13 } from './levels/level13'
 import { createLevel14 } from './levels/level14'
 import { createLevel15 } from './levels/level15'
 import { createLevel16 } from './levels/level16'
+import { createLevel17 } from './levels/level17'
+import { createLevel18 } from './levels/level18'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -61,6 +63,8 @@ const legacyCatalog = [
   { id: 14, name: 'Climbing Time', subtitle: 'Climb through the wall.', theme: 'High jumping, context and grammar', hubLabel: 'TIME GARDENS', world: 'time' as const },
   { id: 15, name: 'Listening Practice', subtitle: 'Go through the boxes and listen to the audio.', theme: 'Moving platforms, listening', hubLabel: 'TIME GARDENS', world: 'time' as const },
   { id: 16, name: 'Scrapped Machinery', subtitle: 'Navigate through the industrial zone.', theme: 'Vocabulary, moving blocks, rotating platforms', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
+  { id: 17, name: 'Solid Hops', subtitle: 'Navigate through the industrial zone.', theme: 'Vocabulary, moving blocks, rotating platforms', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
+  { id: 18, name: 'Fan Catastrophe', subtitle: 'A lot of wind around here, watch out!', theme: 'Vocabulary, Grammar, Fans.', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -98,6 +102,8 @@ const factories: Record<number, () => LevelDef> = {
   14: createLevel14,
   15: createLevel15,
   16: createLevel16,
+  17: createLevel17,
+  18: createLevel18,
 }
 
 // Los niveles personalizados de prueba quedan definidos explícitamente en factory map.
