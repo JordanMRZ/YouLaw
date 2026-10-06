@@ -1,0 +1,11 @@
+---
+description: Convención de autoría y mensajes en commits de git
+alwaysApply: true
+---
+
+# Commits en YouLaw
+
+- Los commits deben figurar **solo** con el autor humano del equipo (identidad git de quien revisa y sube el cambio).
+- **No** añadir líneas `Co-authored-by:` ni otros trailers generados por asistentes o herramientas del entorno de desarrollo.
+- Mensaje claro en la primera línea; cuerpo opcional y breve. Español o inglés, coherente con el historial reciente.
+- No reescribir historial de `main` compartida sin avisar al equipo.
