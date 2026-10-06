@@ -18,6 +18,10 @@ import { createLevel15 } from './levels/level15'
 import { createLevel16 } from './levels/level16'
 import { createLevel17 } from './levels/level17'
 import { createLevel18 } from './levels/level18'
+import { createLevel19 } from './levels/level19'
+import { createLevel20 } from './levels/level20'
+import { createLevel21 } from './levels/level21'
+import { createLevel22 } from './levels/level22'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -65,6 +69,10 @@ const legacyCatalog = [
   { id: 16, name: 'Scrapped Machinery', subtitle: 'Navigate through the industrial zone.', theme: 'Vocabulary, moving blocks, rotating platforms', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
   { id: 17, name: 'Solid Hops', subtitle: 'Navigate through the industrial zone.', theme: 'Vocabulary, moving blocks, rotating platforms', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
   { id: 18, name: 'Fan Catastrophe', subtitle: 'A lot of wind around here, watch out!', theme: 'Vocabulary, Grammar, Fans.', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
+  { id: 19, name: 'Listening Practice 2', subtitle: 'Fans and listening challenges.', theme: 'Fans, listening, vocabulary', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
+  { id: 20, name: 'Emergency Maintenance', subtitle: 'Stay cautious of the winds from the fans and know how to respond.', theme: 'Vocabulary, Grammar, Fans, Listening', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
+  { id: 21, name: 'Neon Staircase', subtitle: 'Shiny colors', theme: 'grammar, vocabulary', hubLabel: 'NEON CITY', world: 'neon' as const },
+  { id: 22, name: 'Skyscraper', subtitle: 'Keep going up.', theme: 'grammar, vocabulary', hubLabel: 'NEON CITY', world: 'neon' as const },
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -104,11 +112,14 @@ const factories: Record<number, () => LevelDef> = {
   16: createLevel16,
   17: createLevel17,
   18: createLevel18,
+  19: createLevel19,
+  20: createLevel20,
+  21: createLevel21,
 }
 
 // Los niveles personalizados de prueba quedan definidos explícitamente en factory map.
 // Desde 15 en adelante, el resto usa la plantilla generada automáticamente.
-for (let id = 20; id <= LEVEL_COUNT; id += 1) {
+for (let id = 25; id <= LEVEL_COUNT; id += 1) {
   const world = worldForLevel(id)
   const localLevel = localLevelForId(id)
   factories[id] = () => createTemplateLevel(id, world, localLevel)
