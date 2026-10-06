@@ -1,4 +1,7 @@
-:root {
+/* Scoped to the game container: this sheet stays loaded after leaving
+   Didáctico, so global selectors would restyle the rest of YouLaw. */
+.didactic-game-host,
+.game-shell {
   --ink: #102030;
   --paper: #f4fbff;
   --mint: #3ee0b3;
@@ -7,7 +10,7 @@
   font-family: Outfit, system-ui, sans-serif;
 }
 
-* {
+:where(.didactic-game-host) * {
   box-sizing: border-box;
 }
 
@@ -23,7 +26,7 @@
   isolation: isolate;
 }
 
-canvas {
+:where(.didactic-game-host) canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -323,6 +326,25 @@ canvas {
   text-align: right;
 }
 
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-pause {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 12px;
+  font-size: 13px;
+  letter-spacing: -1px;
+  text-shadow: none;
+}
+
 .question-bar {
   position: absolute;
   top: 82px;
@@ -402,7 +424,7 @@ canvas {
   pointer-events: none;
 }
 
-button {
+:where(.didactic-game-host) button {
   border: 0;
   border-radius: 999px;
   padding: 10px 16px;
@@ -413,13 +435,13 @@ button {
   cursor: pointer;
 }
 
-button.primary {
+:where(.didactic-game-host) button.primary {
   background: var(--mint);
   color: #102030;
   margin-top: 12px;
 }
 
-button:disabled {
+:where(.didactic-game-host) button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -637,7 +659,7 @@ button:disabled {
   margin: 8px 0;
 }
 
-label {
+:where(.didactic-game-host) label {
   display: grid;
   gap: 6px;
   margin: 10px 0;
@@ -886,6 +908,76 @@ label {
   margin-left: auto;
 }
 
+.editor-snap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.editor-snap select {
+  border: 0;
+  border-radius: 8px;
+  padding: 5px 6px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 650;
+}
+
+.editor-tools button:disabled {
+  opacity: 0.45;
+}
+
+.editor-issues {
+  position: relative;
+}
+
+.editor-issues > button {
+  background: rgba(255, 209, 102, 0.22);
+  color: #ffe3a3;
+  font-weight: 750;
+}
+
+.editor-issues.has-errors > button {
+  background: rgba(255, 107, 107, 0.25);
+  color: #ffd0d0;
+}
+
+.editor-issues ul {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 5;
+  width: min(360px, 80vw);
+  max-height: 50vh;
+  overflow: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 10px;
+  background: rgba(12, 22, 34, 0.96);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.editor-issues li button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border-left: 3px solid #ffd166;
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+.editor-issues li.error button {
+  border-left-color: #ff6b6b;
+}
+
+.editor-issues li button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .editor-toolbar button,
 .editor-left button,
 .editor-right button {
@@ -1027,6 +1119,12 @@ label {
   margin: 8px 0;
 }
 
+.editor-right .editor-check input {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
+
 .editor-advanced {
   margin-top: 12px;
 }
@@ -1055,6 +1153,7 @@ label {
   padding: 6px 8px;
   background: rgba(255, 255, 255, 0.9);
   color: var(--ink);
+  font: inherit;
 }
 
 .editor-motion {

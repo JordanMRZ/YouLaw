@@ -1,4 +1,4 @@
-import { RigidBody } from '@react-three/rapier'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef, useState } from 'react'
 import type { RapierRigidBody } from '@react-three/rapier'
@@ -6,6 +6,10 @@ import { Euler, Quaternion } from 'three'
 import type { PlatformDef } from '../../data/types'
 import { playerRuntime } from '../../game/runtime'
 import { useGameStore } from '../../store/gameStore'
+import { VanishCountdown } from './VanishCountdown'
+
+const VANISH_SECONDS = 3
+const VANISH_MS = VANISH_SECONDS * 1000
 
 const quat = new Quaternion()
 const euler = new Euler()
@@ -15,8 +19,17 @@ export function WorldPlatform({ def, accent }: { def: PlatformDef; accent: strin
   const color = def.color ?? accent
   const [w, h, d] = def.size
   const [vanished, setVanished] = useState(false)
+  const [secondsLeft, setSecondsLeft] = useState(VANISH_SECONDS)
+  const shownSeconds = useRef(VANISH_SECONDS)
+  const hiding = useRef(false)
   const touching = useRef(false)
   const vanishAt = useRef(0)
+
+  function paintSeconds(next: number) {
+    if (shownSeconds.current === next) return
+    shownSeconds.current = next
+    setSecondsLeft(next)
+  }
   const body = useRef<RapierRigidBody>(null)
   const origin = useMemo(() => ({ x: def.position[0], y: def.position[1], z: def.position[2] }), [def.position])
 
@@ -38,12 +51,21 @@ export function WorldPlatform({ def, accent }: { def: PlatformDef; accent: strin
       quat.setFromEuler(euler)
       rb.setNextKinematicRotation(quat)
     }
-    if (kind === 'vanishing' && touching.current && !vanished && vanishAt.current > 0 && performance.now() > vanishAt.current) {
-      setVanished(true)
-      window.setTimeout(() => {
-        touching.current = false
-        setVanished(false)
-      }, 2600)
+    if (kind === 'vanishing' && touching.current && vanishAt.current > 0 && !hiding.current) {
+      const leftMs = vanishAt.current - performance.now()
+      if (leftMs <= 0) {
+        hiding.current = true
+        setVanished(true)
+        window.setTimeout(() => {
+          hiding.current = false
+          touching.current = false
+          vanishAt.current = 0
+          setVanished(false)
+          paintSeconds(VANISH_SECONDS)
+        }, 2600)
+      } else {
+        paintSeconds(Math.max(1, Math.ceil(leftMs / 1000)))
+      }
     }
   })
 
@@ -57,7 +79,7 @@ export function WorldPlatform({ def, accent }: { def: PlatformDef; accent: strin
       ref={body}
       type={type}
       position={def.position}
-      colliders="cuboid"
+      colliders={false}
       friction={isRecovery ? 0.2 : 1.4}
       restitution={kind === 'bounce' ? 1.35 : 0}
       sensor={isRecovery}
@@ -68,16 +90,22 @@ export function WorldPlatform({ def, accent }: { def: PlatformDef; accent: strin
       onCollisionEnter={({ other }) => {
         if (other.rigidBodyObject?.name !== 'player') return
         if (kind === 'bounce') playerRuntime.bounce(13.5)
-        if (kind === 'vanishing' && !touching.current) {
+        if (kind === 'vanishing' && !touching.current && !hiding.current) {
           touching.current = true
-          vanishAt.current = performance.now() + 850
+          vanishAt.current = performance.now() + VANISH_MS
+          paintSeconds(VANISH_SECONDS)
         }
       }}
       onCollisionExit={({ other }) => {
         if (other.rigidBodyObject?.name !== 'player') return
-        if (kind === 'vanishing') touching.current = false
+        if (kind === 'vanishing' && !hiding.current) {
+          touching.current = false
+          vanishAt.current = 0
+          paintSeconds(VANISH_SECONDS)
+        }
       }}
     >
+      <CuboidCollider args={[w / 2, h / 2, d / 2]} />
       <mesh castShadow receiveShadow>
         <boxGeometry args={[w, h, d]} />
         <meshLambertMaterial color={isRecovery ? '#7ec8e3' : color} transparent={isRecovery} opacity={isRecovery ? 0.55 : 1} />
@@ -90,22 +118,8 @@ export function WorldPlatform({ def, accent }: { def: PlatformDef; accent: strin
       )}
 
       {kind === 'vanishing' && !vanished && (
-  <group position={[0, h / 2 + 0.12, 0]}>
-    <mesh castShadow>
-      <coneGeometry args={[w * 0.12, h * 0.24, 3]} />
-      <meshStandardMaterial
-        color="#ffd166"
-        emissive="#ffb703"
-        emissiveIntensity={0.4}
-      />
-    </mesh>
-
-    <mesh position={[0, -0.09, 0]} castShadow>
-      <boxGeometry args={[0.06, h * 0.14, 0.06]} />
-      <meshStandardMaterial color="#fff7d6" />
-    </mesh>
-  </group>
-)}
+        <VanishCountdown seconds={secondsLeft} width={w} depth={d} y={h * 0.52 + 0.05} />
+      )}
     </RigidBody>
   )
 }

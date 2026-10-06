@@ -1,4 +1,4 @@
-import { RigidBody } from '@react-three/rapier'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import type { ChallengeDef } from '../../data/types'
@@ -117,7 +117,8 @@ function AnswerBlock({
   const sizeVec = useMemo(() => size, [size])
 
   return (
-    <RigidBody type="fixed" position={position} colliders={broken ? false : 'cuboid'} friction={1.6}>
+    <RigidBody type="fixed" position={position} colliders={false} friction={1.6}>
+      {!broken && <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />}
       <mesh castShadow receiveShadow>
         <boxGeometry args={sizeVec} />
         <meshLambertMaterial color={color} />
@@ -126,7 +127,12 @@ function AnswerBlock({
         <boxGeometry args={[size[0] * 0.96, 0.07, size[2] * 0.96]} />
         <meshLambertMaterial color={top} />
       </mesh>
-      <WorldLabel text={word} position={[0, size[1] * 0.5 + 1.05, 0]} width={word.length > 10 ? 5.6 : 4.2} />
+      <WorldLabel
+        text={word}
+        position={[0, size[1] * 0.5 + 1.05, 0]}
+        width={word.length > 10 ? 5.6 : 4.2}
+        plate="rgba(16, 32, 48, 0.62)"
+      />
     </RigidBody>
   )
 }

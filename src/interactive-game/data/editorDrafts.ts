@@ -16,7 +16,13 @@ function readAll(): DraftMap {
 }
 
 function writeAll(map: DraftMap) {
-  localStorage.setItem(KEY, JSON.stringify(map))
+  try {
+    localStorage.setItem(KEY, JSON.stringify(map))
+    return true
+  } catch (error) {
+    console.warn('[editor] no se pudo guardar el borrador', error)
+    return false
+  }
 }
 
 export function peekDraft(id: number): LevelDef | null {
@@ -27,7 +33,7 @@ export function peekDraft(id: number): LevelDef | null {
 export function saveDraft(id: number, level: LevelDef) {
   const map = readAll()
   map[String(id)] = level
-  writeAll(map)
+  return writeAll(map)
 }
 
 export function clearDraft(id: number) {

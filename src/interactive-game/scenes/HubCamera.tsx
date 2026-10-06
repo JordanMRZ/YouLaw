@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber'
-import { MathUtils, Vector3 } from 'three'
+import { MathUtils, PerspectiveCamera, Vector3 } from 'three'
 import { planetPosition } from '../data/hubLayout'
 import { useGameStore } from '../store/gameStore'
 
@@ -21,11 +21,11 @@ export function HubCamera() {
       targetPos.copy(shopPos)
       targetLook.copy(shopLook)
     } else if (hubLayer === 'world') {
-      targetPos.set(px, py + 4.8, pz + 13.5)
+      targetPos.set(px, py + 5.4, pz + 16.5)
       targetLook.set(px, py + 1.55, pz - 0.8)
     } else {
-      targetPos.set(px, py + 2.4, pz + 18.5)
-      targetLook.set(px, py + 0.2, pz)
+      targetPos.set(px, py + 2.6, pz + 23)
+      targetLook.set(px, py + 0.6, pz)
     }
 
     if (!lookReady) {
@@ -39,8 +39,10 @@ export function HubCamera() {
     camera.position.lerp(targetPos, t)
     lookCurrent.lerp(targetLook, t)
     camera.lookAt(lookCurrent)
-    camera.fov = MathUtils.lerp(camera.fov, shopOpen ? 46 : hubLayer === 'world' ? 46 : 42, t)
-    camera.updateProjectionMatrix()
+    if (camera instanceof PerspectiveCamera) {
+      camera.fov = MathUtils.lerp(camera.fov, shopOpen ? 46 : hubLayer === 'world' ? 46 : 42, t)
+      camera.updateProjectionMatrix()
+    }
   })
   return null
 }

@@ -47,6 +47,9 @@ async function mountGame() {
   }, 45000)
 
   try {
+    const { refreshMountedDidacticGame, syncDidacticSaveWithAccount } = await import('../../services/didacticProgressService.js')
+    await syncDidacticSaveWithAccount()
+    await refreshMountedDidacticGame()
     const { setGameCanvasReadyListener } = await import('../../interactive-game/gameBoot.ts')
     setGameCanvasReadyListener(() => markReady())
     const { mountInteractiveGame } = await import('../../interactive-game/mount.tsx')

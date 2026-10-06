@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { DEFAULT_CHECKPOINT_WIDTH, DEFAULT_GOAL_SIZE } from '../data/defaults'
 import { clearDraft, peekDraft, saveDraft } from '../data/editorDrafts'
 import { getFactoryLevel, unloadLevel } from '../data/levels'
 import type {
@@ -11,6 +12,7 @@ import type {
   PlatformKind,
   Vec3,
 } from '../data/types'
+import { validateLevel } from '../data/validateLevel'
 import { useGameStore } from './gameStore'
 
 export type EditorKind = 'platform' | 'challenge' | 'option' | 'obstacle' | 'coin' | 'checkpoint' | 'goal' | 'start'
@@ -40,6 +42,7 @@ export interface EditorSelection {
 }
 
 export const editorCursor: { current: Vec3 } = { current: [0, 2, 8] }
+export const editorCamera: { forward: Vec3; right: Vec3 } = { forward: [0, 0, 1], right: [-1, 0, 0] }
 
 let seq = 1
 function uid(prefix: string) {
@@ -103,10 +106,10 @@ export function getSelectedPose(draft: LevelDef, sel: EditorSelection): { positi
     }
     case 'checkpoint': {
       const k = draft.checkpoints.find((item) => item.id === sel.id)
-      return k ? { position: k.position, size: [k.width ?? 8, 0.4, 1.2] } : null
+      return k ? { position: k.position, size: [k.width ?? DEFAULT_CHECKPOINT_WIDTH, 3.4, 1.2] } : null
     }
     case 'goal':
-      return { position: draft.goal.position, size: draft.goal.size ?? [4, 3, 2] }
+      return { position: draft.goal.position, size: draft.goal.size ?? DEFAULT_GOAL_SIZE }
     case 'start':
       return { position: draft.start, size: [1.2, 1.8, 1.2] }
     default:
@@ -122,8 +125,49 @@ export function defaultObstacleSize(kind: ObstacleKind): Vec3 {
   return [1.6, 1.6, 1.6]
 }
 
-export function canScale(kind: EditorKind) {
-  return kind === 'platform' || kind === 'obstacle' || kind === 'challenge' || kind === 'goal' || kind === 'checkpoint'
+export function obstacleUsesSize(kind: ObstacleKind) {
+  return kind === 'barrier' || kind === 'movingBlock'
+}
+
+export function canScale(draft: LevelDef, sel: EditorSelection) {
+  if (sel.kind === 'obstacle') {
+    const o = draft.obstacles.find((item) => item.id === sel.id)
+    return Boolean(o && obstacleUsesSize(o.kind))
+  }
+  return sel.kind === 'platform' || sel.kind === 'challenge' || sel.kind === 'goal' || sel.kind === 'checkpoint'
+}
+
+const MIN_SIZE = 0.2
+
+function clampVec(value: unknown, min: number): unknown {
+  if (!Array.isArray(value)) return value
+  return value.map((n) => (typeof n === 'number' && Number.isFinite(n) ? Math.max(min, n) : min))
+}
+
+function clampNum(value: unknown, min: number, max = Infinity): unknown {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return value
+  return Math.min(max, Math.max(min, value))
+}
+
+function sanitizePatch(patch: Record<string, unknown>) {
+  const next = { ...patch }
+  if ('size' in next) next.size = clampVec(next.size, MIN_SIZE)
+  if ('platformSize' in next) next.platformSize = clampVec(next.platformSize, MIN_SIZE)
+  if ('width' in next) next.width = clampNum(next.width, 1.5, 60)
+  if ('timeLimit' in next) next.timeLimit = clampNum(next.timeLimit, 3, 120)
+  if ('speed' in next) next.speed = clampNum(next.speed, 0, 20)
+  if ('rotationSpeed' in next) next.rotationSpeed = clampNum(next.rotationSpeed, -10, 10)
+  if ('fanForce' in next) next.fanForce = clampNum(next.fanForce, 0, 10)
+  if ('fanReach' in next) next.fanReach = clampNum(next.fanReach, 0.5, 60)
+  if ('fanSpread' in next) next.fanSpread = clampNum(next.fanSpread, 0.5, 30)
+  if ('fanHeight' in next) next.fanHeight = clampNum(next.fanHeight, 0.5, 20)
+  if (next.motion && typeof next.motion === 'object') {
+    const motion = { ...(next.motion as Record<string, unknown>) }
+    motion.amplitude = clampNum(motion.amplitude, 0, 60)
+    motion.speed = clampNum(motion.speed, 0, 20)
+    next.motion = motion
+  }
+  return next
 }
 
 function formatNum(n: number) {
@@ -164,12 +208,9 @@ export function exportLevelTs(level: LevelDef) {
 
 let messageTimer: number | null = null
 
-type EditorClipboard =
-  | {
-      kind: 'platform' | 'coin' | 'obstacle' | 'checkpoint' | 'goal' | 'start'
-      item: Record<string, unknown>
-    }
-  | null
+type ClipKind = Exclude<EditorKind, 'option'>
+
+type EditorClipboard = { kind: ClipKind; item: Record<string, unknown> } | null
 
 interface EditorState {
   levelId: number
@@ -180,6 +221,7 @@ interface EditorState {
   previewMotion: boolean
   focusToken: number
   undoStack: string[]
+  redoStack: string[]
   message: string | null
   dirty: boolean
   clipboard: EditorClipboard
@@ -191,9 +233,11 @@ interface EditorState {
   setSnap: (snap: number) => void
   setPreviewMotion: (value: boolean) => void
   focusSelected: () => void
-  beginUndo: () => void
+  beginUndo: (group?: string) => void
   undo: () => void
+  redo: () => void
   applyWorldTransform: (position: Vec3, size: Vec3) => void
+  nudgeSelected: (delta: Vec3) => void
   patchSelected: (patch: Record<string, unknown>) => void
   copySelected: () => void
   pasteClipboard: () => void
@@ -213,8 +257,35 @@ function showMessage(set: (partial: Partial<EditorState>) => void, text: string)
   }, 2200)
 }
 
+const UNDO_LIMIT = 40
+const UNDO_GROUP_MS = 900
+const undoGroup: { key: string | null; at: number } = { key: null, at: 0 }
+
+let persistTimer: number | null = null
+
+function cancelPersist() {
+  if (persistTimer) {
+    window.clearTimeout(persistTimer)
+    persistTimer = null
+  }
+}
+
 function persist(levelId: number, draft: LevelDef) {
+  cancelPersist()
   saveDraft(levelId, draft)
+}
+
+function persistSoon(getDraft: () => { levelId: number; draft: LevelDef | null }) {
+  if (persistTimer) window.clearTimeout(persistTimer)
+  persistTimer = window.setTimeout(() => {
+    persistTimer = null
+    const { levelId, draft } = getDraft()
+    if (draft) saveDraft(levelId, draft)
+  }, 350)
+}
+
+function keepSelection(draft: LevelDef, sel: EditorSelection | null) {
+  return sel && getSelectedPose(draft, sel) ? sel : null
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -226,6 +297,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   previewMotion: true,
   focusToken: 0,
   undoStack: [],
+  redoStack: [],
   message: null,
   dirty: false,
   clipboard: null,
@@ -241,6 +313,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       selected: firstQuestion ? { kind: 'challenge', id: firstQuestion.id } : null,
       tool: 'translate',
       undoStack: [],
+      redoStack: [],
       dirty: stored !== null,
       focusToken: get().focusToken + 1,
       previewMotion: true,
@@ -256,15 +329,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   leaveEditor: () => {
-    const { draft, levelId } = get()
-    if (draft) persist(levelId, draft)
+    const { draft, levelId, dirty } = get()
+    if (draft && dirty) persist(levelId, draft)
     useGameStore.setState({ phase: 'hub', editorReturn: false, shopOpen: false })
   },
 
   switchLevel: (nextId) => {
     if (nextId === get().levelId) return
-    const { draft, levelId } = get()
-    if (draft) persist(levelId, draft)
+    const { draft, levelId, dirty } = get()
+    if (draft && dirty) persist(levelId, draft)
     get().openEditor(nextId)
   },
 
@@ -274,27 +347,55 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setPreviewMotion: (value) => set({ previewMotion: value }),
   focusSelected: () => set({ focusToken: get().focusToken + 1 }),
 
-  beginUndo: () => {
+  beginUndo: (group) => {
     const { draft, undoStack } = get()
     if (!draft) return
+    const now = performance.now()
+    const sameGroup = group != null && group === undoGroup.key && now - undoGroup.at < UNDO_GROUP_MS
+    undoGroup.key = group ?? null
+    undoGroup.at = now
+    if (sameGroup) return
     const snap = JSON.stringify(draft)
     if (undoStack[undoStack.length - 1] === snap) return
-    set({ undoStack: [...undoStack, snap].slice(-30) })
+    set({ undoStack: [...undoStack, snap].slice(-UNDO_LIMIT), redoStack: [] })
   },
 
   undo: () => {
-    const { undoStack, levelId, selected } = get()
-    if (undoStack.length === 0) return
-    const prev = undoStack[undoStack.length - 1]
-    const draft = JSON.parse(prev) as LevelDef
+    const { undoStack, redoStack, draft: current, levelId } = get()
+    if (undoStack.length === 0 || !current) {
+      showMessage(set, 'Nada que deshacer')
+      return
+    }
+    const draft = JSON.parse(undoStack[undoStack.length - 1]) as LevelDef
+    undoGroup.key = null
     persist(levelId, draft)
     set({
       draft,
       undoStack: undoStack.slice(0, -1),
+      redoStack: [...redoStack, JSON.stringify(current)].slice(-UNDO_LIMIT),
       dirty: true,
-      selected,
+      selected: keepSelection(draft, get().selected),
     })
     showMessage(set, 'Deshecho')
+  },
+
+  redo: () => {
+    const { undoStack, redoStack, draft: current, levelId } = get()
+    if (redoStack.length === 0 || !current) {
+      showMessage(set, 'Nada que rehacer')
+      return
+    }
+    const draft = JSON.parse(redoStack[redoStack.length - 1]) as LevelDef
+    undoGroup.key = null
+    persist(levelId, draft)
+    set({
+      draft,
+      redoStack: redoStack.slice(0, -1),
+      undoStack: [...undoStack, JSON.stringify(current)].slice(-UNDO_LIMIT),
+      dirty: true,
+      selected: keepSelection(draft, get().selected),
+    })
+    showMessage(set, 'Rehecho')
   },
 
   applyWorldTransform: (position, size) => {
@@ -302,6 +403,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!draft || !selected) return
     const next = cloneLevel(draft)
     const pos = snapVec(position, snap)
+    const before = getSelectedPose(draft, selected)?.size
+    const resized = !before || before.some((n, i) => Math.abs(n - size[i]) > 1e-3)
     const sz: Vec3 = [
       Math.max(0.5, snap === 0 ? round2(size[0]) : Math.max(snap, Math.round(size[0] / snap) * snap)),
       Math.max(0.2, snap === 0 ? round2(size[1]) : Math.max(0.2, Math.round(size[1] / snap) * snap)),
@@ -312,14 +415,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         const p = next.platforms.find((item) => item.id === selected.id)
         if (!p) return
         p.position = pos
-        p.size = sz
+        if (resized) p.size = sz
         break
       }
       case 'challenge': {
         const c = next.challenges.find((item) => item.id === selected.id)
         if (!c) return
         c.origin = pos
-        c.platformSize = sz
+        if (resized) c.platformSize = sz
         break
       }
       case 'option': {
@@ -333,7 +436,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         const o = next.obstacles.find((item) => item.id === selected.id)
         if (!o) return
         o.position = pos
-        o.size = sz
+        if (resized && obstacleUsesSize(o.kind)) o.size = sz
         break
       }
       case 'coin': {
@@ -346,12 +449,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         const k = next.checkpoints.find((item) => item.id === selected.id)
         if (!k) return
         k.position = pos
-        k.width = sz[0]
+        if (resized) k.width = Math.max(1.5, sz[0])
         break
       }
       case 'goal':
         next.goal.position = pos
-        next.goal.size = sz
+        if (resized) next.goal.size = sz
         break
       case 'start':
         next.start = pos
@@ -359,14 +462,28 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       default:
         return
     }
-    persist(levelId, next)
     set({ draft: next, dirty: true })
+    persistSoon(() => get())
   },
 
-  patchSelected: (patch) => {
-    const { draft, selected, levelId } = get()
+  nudgeSelected: (delta) => {
+    const { draft, selected, snap } = get()
     if (!draft || !selected) return
-    get().beginUndo()
+    const pose = getSelectedPose(draft, selected)
+    if (!pose) return
+    const step = snap > 0 ? snap : 0.25
+    get().beginUndo(`nudge:${selectionKey(selected)}`)
+    get().applyWorldTransform(
+      [pose.position[0] + delta[0] * step, pose.position[1] + delta[1] * step, pose.position[2] + delta[2] * step],
+      pose.size,
+    )
+  },
+
+  patchSelected: (rawPatch) => {
+    const { draft, selected } = get()
+    if (!draft || !selected) return
+    const patch = sanitizePatch(rawPatch)
+    get().beginUndo(`${selectionKey(selected)}|${Object.keys(patch).sort().join(',')}`)
     const next = cloneLevel(draft)
     switch (selected.kind) {
       case 'platform': {
@@ -435,50 +552,44 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       default:
         return
     }
-    persist(levelId, next)
     set({ draft: next, dirty: true })
+    persistSoon(() => get())
   },
 
   copySelected: () => {
     const { draft, selected } = get()
     if (!draft || !selected) return
-    let item: Record<string, unknown> | null = null
-    switch (selected.kind) {
-      case 'platform': {
-        const match = draft.platforms.find((entry) => entry.id === selected.id)
-        if (match) item = structuredClone(match) as Record<string, unknown>
+    const kind: ClipKind = selected.kind === 'option' ? 'challenge' : selected.kind
+    let item: object | undefined
+    switch (kind) {
+      case 'platform':
+        item = draft.platforms.find((entry) => entry.id === selected.id)
         break
-      }
-      case 'coin': {
-        const match = draft.coins.find((entry) => entry.id === selected.id)
-        if (match) item = structuredClone(match) as Record<string, unknown>
+      case 'challenge':
+        item = draft.challenges.find((entry) => entry.id === selected.id)
         break
-      }
-      case 'obstacle': {
-        const match = draft.obstacles.find((entry) => entry.id === selected.id)
-        if (match) item = structuredClone(match) as Record<string, unknown>
+      case 'coin':
+        item = draft.coins.find((entry) => entry.id === selected.id)
         break
-      }
-      case 'checkpoint': {
-        const match = draft.checkpoints.find((entry) => entry.id === selected.id)
-        if (match) item = structuredClone(match) as Record<string, unknown>
+      case 'obstacle':
+        item = draft.obstacles.find((entry) => entry.id === selected.id)
         break
-      }
+      case 'checkpoint':
+        item = draft.checkpoints.find((entry) => entry.id === selected.id)
+        break
       case 'goal':
-        item = structuredClone(draft.goal) as Record<string, unknown>
+        item = draft.goal
         break
       case 'start':
-        item = { position: structuredClone(draft.start) } as Record<string, unknown>
-        break
-      default:
+        item = { position: draft.start }
         break
     }
     if (!item) {
       showMessage(set, 'No se puede copiar este tipo')
       return
     }
-    set({ clipboard: { kind: selected.kind, item } })
-    showMessage(set, 'Elemento copiado')
+    set({ clipboard: { kind, item: structuredClone(item) as Record<string, unknown> } })
+    showMessage(set, kind === 'challenge' ? 'Pregunta copiada' : 'Elemento copiado')
   },
 
   pasteClipboard: () => {
@@ -487,11 +598,20 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       showMessage(set, 'Nada que pegar')
       return
     }
+    get().beginUndo()
     const next = cloneLevel(draft)
     const offset: Vec3 = [1.5, 0.8, 2]
     let selected: EditorSelection | null = null
-    const cloned = structuredClone(clipboard.item) as Record<string, unknown>
+    const cloned: unknown = structuredClone(clipboard.item)
     switch (clipboard.kind) {
+      case 'challenge': {
+        const challenge = cloned as ChallengeDef
+        challenge.id = uid('q')
+        challenge.origin = [challenge.origin[0], challenge.origin[1], challenge.origin[2] + 12]
+        next.challenges.push(challenge)
+        selected = { kind: 'challenge', id: challenge.id }
+        break
+      }
       case 'platform': {
         const platform = cloned as PlatformDef
         platform.id = uid('p')
@@ -555,7 +675,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }
     persist(levelId, next)
     set({ draft: next, selected, dirty: true, focusToken: get().focusToken + 1 })
-    showMessage(set, 'Pegaado')
+    showMessage(set, 'Pegado')
   },
 
   addKit: (kind) => {
@@ -643,12 +763,28 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       showMessage(set, 'No se puede borrar')
       return
     }
+    if (selected.kind === 'option') {
+      const challenge = draft.challenges.find((item) => item.id === selected.id)
+      if (!challenge) return
+      if (challenge.options.length <= 2) {
+        showMessage(set, 'Mínimo 2 respuestas · selecciona la pregunta para borrarla entera')
+        return
+      }
+      get().beginUndo()
+      const next = cloneLevel(draft)
+      const c = next.challenges.find((item) => item.id === selected.id)!
+      const [removed] = c.options.splice(selected.optionIndex ?? 0, 1)
+      const lostCorrect = removed?.word === c.correctAnswer
+      if (lostCorrect) c.correctAnswer = c.options[0].word
+      persist(levelId, next)
+      set({ draft: next, selected: { kind: 'challenge', id: c.id }, dirty: true })
+      showMessage(set, lostCorrect ? 'Respuesta borrada · revisa cuál es la correcta' : 'Respuesta borrada')
+      return
+    }
     get().beginUndo()
     const next = cloneLevel(draft)
     if (selected.kind === 'platform') next.platforms = next.platforms.filter((item) => item.id !== selected.id)
-    if (selected.kind === 'challenge' || selected.kind === 'option') {
-      next.challenges = next.challenges.filter((item) => item.id !== selected.id)
-    }
+    if (selected.kind === 'challenge') next.challenges = next.challenges.filter((item) => item.id !== selected.id)
     if (selected.kind === 'obstacle') next.obstacles = next.obstacles.filter((item) => item.id !== selected.id)
     if (selected.kind === 'coin') next.coins = next.coins.filter((item) => item.id !== selected.id)
     if (selected.kind === 'checkpoint') next.checkpoints = next.checkpoints.filter((item) => item.id !== selected.id)
@@ -658,17 +794,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   resetToCode: () => {
     const { levelId } = get()
+    cancelPersist()
     clearDraft(levelId)
     unloadLevel(levelId)
     const draft = cloneLevel(getFactoryLevel(levelId))
     editorCursor.current = [...draft.start]
-    set({ draft, selected: null, undoStack: [], dirty: false })
+    set({ draft, selected: null, undoStack: [], redoStack: [], dirty: false })
     showMessage(set, 'Restablecido al código')
   },
 
   playtest: () => {
     const { draft, levelId } = get()
-    if (!draft) return
+    if (!draft || blockOnErrors(draft, 'probar')) return
     persist(levelId, draft)
     unloadLevel(levelId)
     useGameStore.getState().startLevel(levelId, { fromEditor: true })
@@ -676,21 +813,38 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   exportJson: async () => {
     const { draft } = get()
-    if (!draft) return
+    if (!draft || blockOnErrors(draft, 'exportar')) return
     persist(get().levelId, draft)
-    await navigator.clipboard.writeText(JSON.stringify(draft, null, 2))
-    showMessage(set, 'JSON copiado')
+    await copyText(set, JSON.stringify(draft, null, 2), 'JSON copiado')
   },
 
   exportTs: async () => {
     const { draft } = get()
-    if (!draft) return
+    if (!draft || blockOnErrors(draft, 'exportar')) return
     persist(get().levelId, draft)
-    await navigator.clipboard.writeText(exportLevelTs(draft))
-    showMessage(set, 'TypeScript copiado')
+    await copyText(set, exportLevelTs(draft), 'TypeScript copiado')
   },
 
 }))
+
+function blockOnErrors(draft: LevelDef, action: string) {
+  const error = validateLevel(draft).find((issue) => issue.severity === 'error')
+  if (!error) return false
+  const store = useEditorStore.getState()
+  store.select(error.target)
+  store.focusSelected()
+  showMessage(useEditorStore.setState, `No se puede ${action}: ${error.text}`)
+  return true
+}
+
+async function copyText(set: (partial: Partial<EditorState>) => void, text: string, done: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    showMessage(set, done)
+  } catch {
+    showMessage(set, 'El navegador no dejó copiar al portapapeles')
+  }
+}
 
 function colorForPlatform(kind: PlatformKind) {
   if (kind === 'moving') return '#7ec8e3'

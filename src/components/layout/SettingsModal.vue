@@ -18,7 +18,7 @@ const selectedTestingLevel = ref('A1')
   <Transition name="toast" appear>
     <div class="lesson-modal settings-modal">
       <button type="button" class="close-button" aria-label="Cerrar configuración" @click="$emit('close')">×</button>
-      <span class="toast-label">SETTINGS</span>
+      <span class="toast-label">AJUSTES</span>
       <h2>Configuración</h2>
       <p class="preparation-lead">Herramientas locales para revisar el estado de tu experiencia durante el desarrollo.</p>
       <p v-if="userEmail" class="settings-account">Sesión: <strong>{{ userEmail }}</strong></p>
@@ -31,19 +31,21 @@ const selectedTestingLevel = ref('A1')
         <div class="settings-row level-testing-setting">
           <span class="settings-icon"><AppIcon :icon="StarIcon" :size="18" /></span>
           <div><strong>Probar un nivel</strong><p>Activa un nivel para revisar sus lecciones y preguntas.</p></div>
-          <select v-model="selectedTestingLevel" aria-label="Nivel para probar"><option v-for="level in ['A1', 'A2', 'B1', 'B2', 'C1']" :key="level" :value="level">{{ level }}</option></select>
-          <button class="theme-toggle" type="button" @click="$emit('set-testing-level', selectedTestingLevel)">Aplicar</button>
+          <div class="level-testing-actions">
+            <select v-model="selectedTestingLevel" aria-label="Nivel para probar"><option v-for="level in ['A1', 'A2', 'B1', 'B2', 'C1']" :key="level" :value="level">{{ level }}</option></select>
+            <button class="theme-toggle" type="button" @click="$emit('set-testing-level', selectedTestingLevel)">Aplicar</button>
+          </div>
         </div>
         <div class="settings-row">
           <span class="settings-icon"><AppIcon :icon="Settings01Icon" :size="18" /></span>
-          <div><strong>Development / Reset</strong><p>Borra el progreso local de YouLaw y vuelve al estado inicial.</p></div>
+          <div><strong>Reiniciar progreso</strong><p>Borra el progreso local de YouLaw y vuelve al estado inicial.</p></div>
         </div>
         <button class="secondary-button settings-logout" type="button" @click="$emit('logout')">Cerrar sesión</button>
-        <button class="danger-button" type="button" @click="confirmingReset = true">Reset my progress</button>
+        <button class="danger-button" type="button" @click="confirmingReset = true">Reiniciar mi progreso</button>
       </template>
       <template v-else>
-        <div class="reset-warning"><strong>⚠ RESET PROGRESS</strong><p>Se borrará el nivel, diagnóstico, XP, racha, lecciones y logros locales. Esta acción no se puede deshacer.</p></div>
-        <div class="settings-actions"><button class="secondary-button" type="button" @click="confirmingReset = false">Cancelar</button><button class="danger-button" type="button" @click="$emit('reset')">Reset everything</button></div>
+        <div class="reset-warning"><strong>⚠ Reiniciar progreso</strong><p>Se borrará el nivel, diagnóstico, XP, racha, lecciones y logros locales. Esta acción no se puede deshacer.</p></div>
+        <div class="settings-actions"><button class="secondary-button" type="button" @click="confirmingReset = false">Cancelar</button><button class="danger-button" type="button" @click="$emit('reset')">Reiniciar todo</button></div>
       </template>
     </div>
   </Transition>

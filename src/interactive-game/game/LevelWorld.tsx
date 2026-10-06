@@ -36,7 +36,7 @@ export function LevelWorld({ level }: { level: LevelDef }) {
       {level.zones?.map((zone) => (
         <WorldLabel key={zone.id} text={zone.label} position={zone.position} width={8} />
       ))}
-      <GoalArch position={level.goal.position} />
+      <GoalArch position={level.goal.position} size={level.goal.size} />
       <ChallengeDirector challenges={level.challenges} />
       <ProgressLock challenges={level.challenges} />
       <TimerSync />

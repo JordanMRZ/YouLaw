@@ -22,8 +22,8 @@
 }
 
 .life-heart.lost {
-  opacity: 0.35;
-  filter: grayscale(1);
+  opacity: 1;
+  filter: none;
 }
 
 .streak-pill .app-huge-icon {
@@ -54,7 +54,7 @@
   }
 
   .lesson-path {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .main-content.main-content--didactic {
@@ -70,6 +70,8 @@
 
   .app-shell > .sidebar {
     width: 100%;
+    height: auto;
+    position: static;
     flex-direction: column;
     padding: 12px 14px 10px;
     border-right: 0;
@@ -101,6 +103,11 @@
   }
 
   .sidebar-bottom {
+    display: flex;
+    margin-top: 10px;
+  }
+
+  .sidebar-bottom .help-card {
     display: none;
   }
 
@@ -189,9 +196,13 @@
 
   .lesson-modal,
   .settings-modal {
+    top: 12px;
     right: 12px;
+    bottom: auto;
     left: 12px;
-    bottom: 12px;
     width: auto;
+    max-height: calc(100dvh - 24px);
+    transform: none;
+    overflow: auto;
   }
 }

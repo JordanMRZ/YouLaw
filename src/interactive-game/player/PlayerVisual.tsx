@@ -1,33 +1,52 @@
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
-import { Group } from 'three'
+import { Group, MeshStandardMaterial } from 'three'
 import type { Cosmetics } from '../data/types'
 import { playerRuntime } from '../game/runtime'
 
+const materialCache = new Map<string, MeshStandardMaterial>()
+
+function sharedMaterial(
+  color: string,
+  roughness: number,
+  metalness: number,
+  opacity = 1,
+): MeshStandardMaterial {
+  const key = `${color}|${roughness}|${metalness}|${opacity}`
+  let material = materialCache.get(key)
+  if (!material) {
+    material = new MeshStandardMaterial({
+      color,
+      roughness,
+      metalness,
+      transparent: opacity < 1,
+      opacity,
+    })
+    materialCache.set(key, material)
+  }
+  return material
+}
+
+function Mat({
+  color,
+  roughness = 0.5,
+  metalness = 0,
+  opacity = 1,
+}: {
+  color: string
+  roughness?: number
+  metalness?: number
+  opacity?: number
+}) {
+  return <primitive object={sharedMaterial(color, roughness, metalness, opacity)} attach="material" />
+}
+
 function Skin({ color }: { color: string }) {
-  return (
-    <meshPhysicalMaterial
-      color={color}
-      roughness={0.48}
-      metalness={0.02}
-      sheen={0.35}
-      sheenRoughness={0.72}
-      sheenColor="#fff1e4"
-    />
-  )
+  return <Mat color={color} roughness={0.55} />
 }
 
 function Cloth({ color, shiny = false }: { color: string; shiny?: boolean }) {
-  return (
-    <meshPhysicalMaterial
-      color={color}
-      roughness={shiny ? 0.22 : 0.62}
-      metalness={shiny ? 0.42 : 0.04}
-      sheen={shiny ? 0.15 : 0.45}
-      sheenRoughness={0.7}
-      sheenColor="#ffffff"
-    />
-  )
+  return <Mat color={color} roughness={shiny ? 0.25 : 0.7} metalness={shiny ? 0.4 : 0} />
 }
 
 export function PlayerVisual({
@@ -43,6 +62,7 @@ export function PlayerVisual({
   const leftLeg = useRef<Group>(null)
   const rightLeg = useRef<Group>(null)
   const squash = useRef(1)
+  const stride = useRef(0)
   const look = useMemo(
     () => ({
       skin: cosmetics.skin,
@@ -59,17 +79,20 @@ export function PlayerVisual({
     if (!root) return
     const t = performance.now() / 1000
     const anim = pose === 'turntable' || pose === 'idle' ? 'idle' : playerRuntime.anim
-    const speed = Math.min(1, playerRuntime.velocity.length() / 9)
+    const v = playerRuntime.velocity
+    const speed = Math.min(1.3, Math.hypot(v.x, v.z) / 9)
     let arm = 0
     let leg = 0
     let bob = 0
     let armZ = 0
 
     if (anim === 'run') {
-      const swing = Math.sin(t * 11) * 0.72 * speed
+      stride.current += dt * (5 + 8 * speed)
+      const amount = 0.72 * Math.min(1, Math.max(0.3, speed))
+      const swing = Math.sin(stride.current) * amount
       arm = swing
       leg = -swing
-      bob = Math.abs(Math.sin(t * 11)) * 0.05
+      bob = Math.abs(Math.sin(stride.current)) * 0.05 * Math.min(1, speed + 0.3)
     } else if (anim === 'idle') {
       bob = Math.sin(t * 2.1) * 0.018
       arm = Math.sin(t * 1.45) * 0.06
@@ -106,7 +129,7 @@ export function PlayerVisual({
     <group ref={group}>
       <group position={[0, 1.5, 0]} scale={[1, 0.96, 0.94]}>
         <mesh castShadow>
-          <sphereGeometry args={[0.36, 32, 28]} />
+          <sphereGeometry args={[0.36, 24, 20]} />
           <Skin color={look.skin} />
         </mesh>
         <mesh position={[-0.22, -0.04, 0.16]} scale={[1, 0.85, 0.8]}>
@@ -404,7 +427,7 @@ function Arm({
           </mesh>
           <mesh>
             <cylinderGeometry args={[0.038, 0.038, 0.016, 14]} />
-            <meshPhysicalMaterial color="#eef7ff" roughness={0.12} metalness={0.35} />
+            <Mat color="#eef7ff" roughness={0.15} metalness={0.35} />
           </mesh>
         </group>
       )}
@@ -459,11 +482,11 @@ function Face({ skin, hair }: { skin: string; hair: string }) {
       </mesh>
       <mesh position={[-0.16, -0.05, 0.08]}>
         <sphereGeometry args={[0.045, 12, 12]} />
-        <meshPhysicalMaterial color="#f09aa0" transparent opacity={0.42} roughness={0.55} />
+        <Mat color="#f09aa0" opacity={0.42} roughness={0.55} />
       </mesh>
       <mesh position={[0.16, -0.05, 0.08]}>
         <sphereGeometry args={[0.045, 12, 12]} />
-        <meshPhysicalMaterial color="#f09aa0" transparent opacity={0.42} roughness={0.55} />
+        <Mat color="#f09aa0" opacity={0.42} roughness={0.55} />
       </mesh>
       <mesh position={[0, -0.01, 0.12]}>
         <sphereGeometry args={[0.028, 10, 10]} />
@@ -471,7 +494,7 @@ function Face({ skin, hair }: { skin: string; hair: string }) {
       </mesh>
       <mesh position={[0, -0.11, 0.11]} rotation={[0.2, 0, Math.PI]}>
         <torusGeometry args={[0.042, 0.009, 8, 16, Math.PI]} />
-        <meshPhysicalMaterial color="#c56b62" roughness={0.4} />
+        <Mat color="#c56b62" roughness={0.4} />
       </mesh>
     </group>
   )
@@ -482,15 +505,15 @@ function Eye({ x }: { x: number }) {
     <group position={[x, 0.035, 0.1]}>
       <mesh scale={[1, 1.08, 0.7]}>
         <sphereGeometry args={[0.062, 16, 14]} />
-        <meshPhysicalMaterial color="#fffaf4" roughness={0.28} />
+        <Mat color="#fffaf4" roughness={0.3} />
       </mesh>
       <mesh position={[0, -0.004, 0.03]}>
         <sphereGeometry args={[0.032, 14, 14]} />
-        <meshPhysicalMaterial color="#4a3426" roughness={0.28} />
+        <Mat color="#4a3426" roughness={0.3} />
       </mesh>
       <mesh position={[0, -0.004, 0.048]}>
         <sphereGeometry args={[0.018, 12, 12]} />
-        <meshPhysicalMaterial color="#16110e" roughness={0.2} />
+        <Mat color="#16110e" roughness={0.2} />
       </mesh>
       <mesh position={[0.012, 0.014, 0.058]}>
         <sphereGeometry args={[0.011, 10, 10]} />
@@ -502,7 +525,7 @@ function Eye({ x }: { x: number }) {
       </mesh>
       <mesh position={[0, 0.05, 0.02]} rotation={[0.2, 0, 0]}>
         <capsuleGeometry args={[0.01, 0.08, 3, 8]} />
-        <meshPhysicalMaterial color="#2b211c" roughness={0.5} />
+        <Mat color="#2b211c" roughness={0.5} />
       </mesh>
     </group>
   )
@@ -620,22 +643,22 @@ function Glasses({ cosmetics }: { cosmetics: Cosmetics }) {
           </mesh>
           <mesh position={[-0.1, 0, 0.002]}>
             <circleGeometry args={[0.052, 18]} />
-            <meshPhysicalMaterial color={lens} transparent opacity={sun ? 0.72 : 0.18} roughness={0.08} metalness={0.2} />
+            <Mat color={lens} opacity={sun ? 0.72 : 0.18} roughness={0.1} metalness={0.2} />
           </mesh>
           <mesh position={[0.1, 0, 0.002]}>
             <circleGeometry args={[0.052, 18]} />
-            <meshPhysicalMaterial color={lens} transparent opacity={sun ? 0.72 : 0.18} roughness={0.08} metalness={0.2} />
+            <Mat color={lens} opacity={sun ? 0.72 : 0.18} roughness={0.1} metalness={0.2} />
           </mesh>
         </>
       ) : (
         <>
           <mesh position={[-0.1, 0, 0.004]}>
             <boxGeometry args={[0.11, 0.06, 0.006]} />
-            <meshPhysicalMaterial color={lens} transparent opacity={sun ? 0.62 : 0.14} roughness={0.08} metalness={0.22} />
+            <Mat color={lens} opacity={sun ? 0.62 : 0.14} roughness={0.1} metalness={0.2} />
           </mesh>
           <mesh position={[0.1, 0, 0.004]}>
             <boxGeometry args={[0.11, 0.06, 0.006]} />
-            <meshPhysicalMaterial color={lens} transparent opacity={sun ? 0.62 : 0.14} roughness={0.08} metalness={0.22} />
+            <Mat color={lens} opacity={sun ? 0.62 : 0.14} roughness={0.1} metalness={0.2} />
           </mesh>
           <mesh position={[-0.1, 0.034, 0.006]}>
             <boxGeometry args={[0.118, 0.01, 0.01]} />

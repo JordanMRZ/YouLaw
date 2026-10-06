@@ -171,9 +171,9 @@ export function createLevel11(): LevelDef {
         ],
         correctAnswer: "2022",
         platformSize: [4.5, 0.72, 4.6],
-        sentence: "She teaches english since ___",
+        sentence: "She has taught English since ___",
         timeLimit: 15,
-        audioText: "She teaches englih since 2022",
+        audioText: "She has taught English since 2022",
         explanation: "Two thousand twenty two = 2022",
         hideSentence: true
       },

@@ -20,7 +20,7 @@ export function GameSession() {
   const level = useMemo(() => getLevel(levelId), [levelId, sessionId])
 
   return (
-    <Physics key={`${levelId}-${sessionId}`} gravity={[0, -26, 0]} interpolate paused={paused} timeStep="vary">
+    <Physics key={`${levelId}-${sessionId}`} gravity={[0, -26, 0]} interpolate paused={paused} timeStep={1 / 60}>
       <LevelWorld level={level} />
       <Player level={level} />
       <ThirdPersonCamera />

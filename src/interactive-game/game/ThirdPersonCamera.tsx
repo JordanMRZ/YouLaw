@@ -1,17 +1,20 @@
 import { useRapier } from '@react-three/rapier'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Vector3 } from 'three'
 import { playerRuntime } from './runtime'
 
 const _ideal = new Vector3()
 const _look = new Vector3()
+const _lookGoal = new Vector3()
 const _target = new Vector3()
 
 export function ThirdPersonCamera() {
   const { camera } = useThree()
   const { world, rapier } = useRapier()
+  const ray = useMemo(() => new rapier.Ray({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 1 }), [rapier])
   const distance = useRef(8.6)
+  const lookReady = useRef(false)
 
   useEffect(() => {
     const onWheel = (event: WheelEvent) => {
@@ -38,12 +41,14 @@ export function ThirdPersonCamera() {
     const nx = dx / len
     const ny = dy / len
     const nz = dz / len
-    const ray = new rapier.Ray({ x: ox, y: oy, z: oz }, { x: nx, y: ny, z: nz })
+    ray.origin = { x: ox, y: oy, z: oz }
+    ray.dir = { x: nx, y: ny, z: nz }
     const hit = world.castRay(ray, len, true, undefined, undefined, undefined, undefined, (collider) => {
       if (collider.isSensor()) return false
       const parent = collider.parent()
-      const data = parent?.userData as { player?: boolean } | undefined
-      return !data?.player
+      const data = parent?.userData as { player?: boolean; ignoreCamera?: boolean } | undefined
+      if (data?.player || data?.ignoreCamera) return false
+      return true
     })
     _target.copy(_ideal)
     if (hit && hit.timeOfImpact < len - 0.35 && ny > -0.15) {
@@ -53,7 +58,13 @@ export function ThirdPersonCamera() {
     _target.y = Math.max(_target.y, p.y + 2.8, 3.2)
     const smooth = 1 - Math.pow(0.018, dt)
     camera.position.lerp(_target, smooth)
-    _look.set(p.x + Math.sin(yaw) * 1.2, Math.max(p.y + 1.62, 1.2), p.z + 6.2)
+    _lookGoal.set(p.x + Math.sin(yaw) * 1.2, Math.max(p.y + 1.62, 1.2), p.z + 6.2)
+    if (!lookReady.current) {
+      _look.copy(_lookGoal)
+      lookReady.current = true
+    } else {
+      _look.lerp(_lookGoal, 1 - Math.pow(0.002, dt))
+    }
     camera.lookAt(_look)
   })
 

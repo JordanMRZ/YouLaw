@@ -62,22 +62,26 @@ function Cloud({ x, y, z, s, speed }: { x: number; y: number; z: number; s: numb
     if (ref.current.position.x > 24) ref.current.position.x = -24
   })
   return (
-    <group ref={ref} position={[x, y, z]} scale={s}>
+    <group ref={ref} position={[x, y, z]} scale={[s, s * 0.78, s]}>
       <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[1.15, 10, 8]} />
-        <meshBasicMaterial color="#ffffff" />
+        <icosahedronGeometry args={[1.15, 2]} />
+        <meshLambertMaterial color="#ffffff" emissive="#e6eef8" emissiveIntensity={0.6} />
       </mesh>
-      <mesh position={[1.1, -0.1, 0.15]}>
-        <sphereGeometry args={[0.85, 10, 8]} />
-        <meshBasicMaterial color="#f7fbff" />
+      <mesh position={[1.1, -0.15, 0.15]}>
+        <icosahedronGeometry args={[0.85, 2]} />
+        <meshLambertMaterial color="#f7fbff" emissive="#e6eef8" emissiveIntensity={0.6} />
       </mesh>
-      <mesh position={[-1, -0.15, 0.1]}>
-        <sphereGeometry args={[0.78, 10, 8]} />
-        <meshBasicMaterial color="#eef6ff" />
+      <mesh position={[-1, -0.2, 0.1]}>
+        <icosahedronGeometry args={[0.78, 2]} />
+        <meshLambertMaterial color="#eef6ff" emissive="#e6eef8" emissiveIntensity={0.6} />
       </mesh>
       <mesh position={[0.2, 0.45, -0.1]}>
-        <sphereGeometry args={[0.7, 10, 8]} />
-        <meshBasicMaterial color="#ffffff" />
+        <icosahedronGeometry args={[0.7, 2]} />
+        <meshLambertMaterial color="#ffffff" emissive="#e6eef8" emissiveIntensity={0.6} />
+      </mesh>
+      <mesh position={[1.9, -0.35, 0]}>
+        <icosahedronGeometry args={[0.5, 2]} />
+        <meshLambertMaterial color="#f2f7fd" emissive="#e6eef8" emissiveIntensity={0.6} />
       </mesh>
     </group>
   )

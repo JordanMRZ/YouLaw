@@ -62,24 +62,50 @@ function SkyDome({ top, bottom }: { top: string; bottom: string }) {
   )
 }
 
+const CLOUD_PUFFS: [number, number, number, number][] = [
+  [0, 0, 0, 1.25],
+  [1.35, -0.2, 0.2, 0.95],
+  [-1.3, -0.25, 0.1, 0.9],
+  [0.45, 0.55, -0.15, 0.82],
+  [-0.55, 0.4, 0.3, 0.7],
+  [2.3, -0.4, 0, 0.6],
+  [-2.2, -0.45, -0.1, 0.55],
+]
+const CLOUD_COUNT = 11
+const CLOUD_SPAN = 140
+
 function Clouds() {
-  const group = useRef<InstancedMesh>(null)
-  const count = 10
+  const mesh = useRef<InstancedMesh>(null)
+  const clouds = useMemo(
+    () =>
+      Array.from({ length: CLOUD_COUNT }, (_, i) => ({
+        x: (i % 2 === 0 ? -1 : 1) * (20 + ((i * 7) % 4) * 6),
+        y: 13 + ((i * 5) % 4) * 2.6,
+        z: -10 + i * 18,
+        s: 2 + ((i * 3) % 4) * 0.45,
+        speed: 0.35 + (i % 3) * 0.15,
+      })),
+    [],
+  )
   useFrame((state) => {
-    if (!group.current) return
-    for (let i = 0; i < count; i++) {
-      dummy.position.set(-30 + i * 12, 16 + (i % 3) * 2, 20 + (i % 4) * 18)
-      dummy.rotation.y = state.clock.elapsedTime * 0.02 + i
-      dummy.scale.setScalar(2.2 + (i % 3) * 0.6)
-      dummy.updateMatrix()
-      group.current.setMatrixAt(i, dummy.matrix)
+    if (!mesh.current) return
+    const t = state.clock.elapsedTime
+    let index = 0
+    for (const cloud of clouds) {
+      const cx = ((((cloud.x + t * cloud.speed + CLOUD_SPAN / 2) % CLOUD_SPAN) + CLOUD_SPAN) % CLOUD_SPAN) - CLOUD_SPAN / 2
+      for (const [px, py, pz, r] of CLOUD_PUFFS) {
+        dummy.position.set(cx + px * cloud.s, cloud.y + py * cloud.s, cloud.z + pz * cloud.s)
+        dummy.scale.set(r * cloud.s, r * cloud.s * 0.72, r * cloud.s * 0.85)
+        dummy.updateMatrix()
+        mesh.current.setMatrixAt(index++, dummy.matrix)
+      }
     }
-    group.current.instanceMatrix.needsUpdate = true
+    mesh.current.instanceMatrix.needsUpdate = true
   })
   return (
-    <instancedMesh ref={group} args={[undefined, undefined, count]}>
-      <sphereGeometry args={[1.6, 8, 8]} />
-      <meshLambertMaterial color="#ffffff" transparent opacity={0.55} />
+    <instancedMesh ref={mesh} args={[undefined, undefined, CLOUD_COUNT * CLOUD_PUFFS.length]} frustumCulled={false}>
+      <icosahedronGeometry args={[1, 2]} />
+      <meshLambertMaterial color="#ffffff" emissive="#dce8f5" emissiveIntensity={0.55} />
     </instancedMesh>
   )
 }

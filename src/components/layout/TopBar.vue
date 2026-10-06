@@ -11,6 +11,7 @@ const props = defineProps({
   lifeShake: { type: Boolean, default: false },
   isLocked: { type: Boolean, default: false },
   lockRemainingSeconds: { type: Number, default: 0 },
+  streak: { type: Number, default: 0 },
 })
 
 const hearts = computed(() => Array.from({ length: props.maxLives }, (_, index) => index < props.lives))
@@ -34,7 +35,7 @@ const lockLabel = computed(() => {
         </div>
         <span v-if="isLocked" class="lock-timer">{{ lockLabel }}</span>
       </div>
-      <div class="streak-pill"><AppIcon :icon="FireIcon" :size="18" /><strong>5</strong><small>días</small></div>
+      <div class="streak-pill" :aria-label="`Racha de ${streak} ${streak === 1 ? 'día' : 'días'}`"><AppIcon :icon="FireIcon" :size="18" /><strong>{{ streak }}</strong><small>{{ streak === 1 ? 'día' : 'días' }}</small></div>
     </div>
   </header>
 </template>

@@ -620,59 +620,61 @@ onBeforeUnmount(() => {
   margin-bottom: 20px;
 }
 
-/* Dark mode adjustments */
-:global(.dark-mode) .enhanced-lesson-modal {
+/* Dark mode adjustments.
+   The whole selector stays inside :global(); a leading :global(.dark-mode)
+   makes Vue drop the rest and paint the entire page with the last color. */
+:global(.dark-mode .enhanced-lesson-modal) {
   background: #1e293b;
   border-color: #334155;
   color: #f8fafc;
 }
 
-:global(.dark-mode) .close-btn:hover {
+:global(.dark-mode .close-btn:hover) {
   color: #f8fafc;
   background: rgba(255, 255, 255, 0.1);
 }
 
-:global(.dark-mode) .exercise-progress-track {
+:global(.dark-mode .exercise-progress-track) {
   background: #334155;
 }
 
-:global(.dark-mode) .prompt-heading {
+:global(.dark-mode .prompt-heading) {
   color: #f8fafc;
 }
 
-:global(.dark-mode) .prompt-tip {
+:global(.dark-mode .prompt-tip) {
   color: #94a3b8;
 }
 
-:global(.dark-mode) .enhanced-option-card {
+:global(.dark-mode .enhanced-option-card) {
   background: #0f172a;
   border-color: #334155;
   color: #f1f5f9;
 }
 
-:global(.dark-mode) .enhanced-option-card:hover:not(:disabled) {
+:global(.dark-mode .enhanced-option-card:hover:not(:disabled)) {
   border-color: #60a5fa;
   background: rgba(96, 165, 250, 0.12);
 }
 
-:global(.dark-mode) .option-letter {
+:global(.dark-mode .option-letter) {
   background: #1e293b;
   color: #cbd5e1;
 }
 
-:global(.dark-mode) .feedback-icon-box {
+:global(.dark-mode .feedback-icon-box) {
   background: #0f172a;
 }
 
-:global(.dark-mode) .feedback-detail {
+:global(.dark-mode .feedback-detail) {
   color: #cbd5e1;
 }
 
-:global(.dark-mode) .feedback-panel.correct .feedback-title {
+:global(.dark-mode .feedback-panel.correct .feedback-title) {
   color: #34d399;
 }
 
-:global(.dark-mode) .feedback-panel.incorrect .feedback-title {
+:global(.dark-mode .feedback-panel.incorrect .feedback-title) {
   color: #f87171;
 }
 

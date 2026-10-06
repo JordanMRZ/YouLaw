@@ -2,11 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { listDraftIds } from '../data/editorDrafts'
 import { LEVEL_COUNT, levelCatalog } from '../data/levels'
 import { worldMeta } from '../data/worlds'
+import { DEFAULT_CHECKPOINT_WIDTH, DEFAULT_GOAL_SIZE } from '../data/defaults'
 import type { ChallengeDef, LevelDef, ObstacleDef, PlatformDef, Vec3 } from '../data/types'
+import { validateLevel, type LevelIssue } from '../data/validateLevel'
 import {
   CHALLENGE_TYPES,
   OBSTACLE_KINDS,
   PLATFORM_KINDS,
+  defaultObstacleSize,
+  editorCamera,
+  obstacleUsesSize,
   patchMotion,
   selectionKey,
   useEditorStore,
@@ -15,6 +20,17 @@ import {
 } from '../store/editorStore'
 
 type OutlinerTab = 'all' | 'questions' | 'platforms' | 'obstacles' | 'pickups'
+
+const SNAP_STEPS = [0, 0.25, 0.5, 1, 2]
+
+const NUDGE_KEYS: Record<string, 'left' | 'right' | 'forward' | 'back' | 'up' | 'down'> = {
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+  ArrowUp: 'forward',
+  ArrowDown: 'back',
+  PageUp: 'up',
+  PageDown: 'down',
+}
 
 const ADD_GROUPS: { title: string; items: { id: AddKit; label: string }[] }[] = [
   {
@@ -46,7 +62,7 @@ const ADD_GROUPS: { title: string; items: { id: AddKit; label: string }[] }[] = 
     items: [
       { id: 'coin', label: 'Moneda' },
       { id: 'checkpoint', label: 'Checkpoint' },
-      { id: 'goal', label: 'Meta' },
+      { id: 'goal', label: 'Mover meta' },
     ],
   },
 ]
@@ -71,9 +87,14 @@ export function EditorPanel() {
   const message = useEditorStore((s) => s.message)
   const dirty = useEditorStore((s) => s.dirty)
   const levelId = useEditorStore((s) => s.levelId)
+  const snap = useEditorStore((s) => s.snap)
+  const canUndo = useEditorStore((s) => s.undoStack.length > 0)
+  const canRedo = useEditorStore((s) => s.redoStack.length > 0)
   const [tab, setTab] = useState<OutlinerTab>('questions')
   const [query, setQuery] = useState('')
   const drafts = useMemo(() => new Set(listDraftIds()), [dirty, levelId, draft])
+  const issues = useMemo(() => (draft ? validateLevel(draft) : []), [draft])
+  const errorCount = issues.filter((issue) => issue.severity === 'error').length
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -110,9 +131,40 @@ export function EditorPanel() {
         event.preventDefault()
         store.deleteSelected()
       }
-      if ((event.ctrlKey || event.metaKey) && event.code === 'KeyZ') {
+      const nudge = NUDGE_KEYS[event.code]
+      if (nudge && store.selected) {
         event.preventDefault()
-        store.undo()
+        const amount = event.shiftKey ? 4 : 1
+        if (nudge === 'up' || nudge === 'down') {
+          store.nudgeSelected([0, nudge === 'up' ? amount : -amount, 0])
+        } else {
+          const base = nudge === 'left' || nudge === 'right' ? editorCamera.right : editorCamera.forward
+          const sign = nudge === 'left' || nudge === 'back' ? -amount : amount
+          store.nudgeSelected(
+            Math.abs(base[0]) >= Math.abs(base[2])
+              ? [Math.sign(base[0]) * sign, 0, 0]
+              : [0, 0, Math.sign(base[2]) * sign],
+          )
+        }
+        return
+      }
+      const mod = event.ctrlKey || event.metaKey
+      if (mod && event.code === 'KeyZ') {
+        event.preventDefault()
+        if (event.shiftKey) store.redo()
+        else store.undo()
+      }
+      if (mod && event.code === 'KeyY') {
+        event.preventDefault()
+        store.redo()
+      }
+      if (mod && event.code === 'KeyC') {
+        event.preventDefault()
+        store.copySelected()
+      }
+      if (mod && event.code === 'KeyV') {
+        event.preventDefault()
+        store.pasteClipboard()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -127,7 +179,7 @@ export function EditorPanel() {
     <div className="editor-ui">
       <header className="editor-toolbar">
         <button type="button" onClick={() => useEditorStore.getState().leaveEditor()}>
-          Hub
+          Mapa
         </button>
         <div className="editor-level-switch">
           <button
@@ -177,13 +229,35 @@ export function EditorPanel() {
           <button type="button" className={previewMotion ? 'on' : ''} onClick={() => useEditorStore.getState().setPreviewMotion(!previewMotion)}>
             Animar
           </button>
-          <button type="button" onClick={() => useEditorStore.getState().copySelected()}>
+          <button type="button" title="Ctrl+C" onClick={() => useEditorStore.getState().copySelected()}>
             Copiar
           </button>
-          <button type="button" onClick={() => useEditorStore.getState().pasteClipboard()}>
+          <button type="button" title="Ctrl+V" onClick={() => useEditorStore.getState().pasteClipboard()}>
             Pegar
           </button>
+          <button type="button" title="Ctrl+Z" disabled={!canUndo} onClick={() => useEditorStore.getState().undo()}>
+            Deshacer
+          </button>
+          <button
+            type="button"
+            title="Ctrl+Y · Ctrl+Shift+Z"
+            disabled={!canRedo}
+            onClick={() => useEditorStore.getState().redo()}
+          >
+            Rehacer
+          </button>
+          <label className="editor-snap">
+            Cuadrícula
+            <select value={snap} onChange={(event) => useEditorStore.getState().setSnap(Number(event.target.value))}>
+              {SNAP_STEPS.map((step) => (
+                <option key={step} value={step}>
+                  {step === 0 ? 'Libre' : step}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
+        {issues.length > 0 && <IssuesBadge issues={issues} errorCount={errorCount} />}
         <div className="editor-tools editor-toolbar-end">
           <button type="button" className="primary" onClick={() => useEditorStore.getState().playtest()}>
             Probar
@@ -263,8 +337,41 @@ export function EditorPanel() {
       <p className="editor-status">
         {selected?.kind === 'challenge' || selected?.kind === 'option'
           ? 'La frase y las 3 respuestas se editan a la derecha. Clic en una plataforma con palabra también las abre.'
-          : 'Elige una pregunta en “Preguntas” o en el selector de objeto. [ y ] cambian de nivel.'}
+          : selected
+            ? 'Arrastra el objeto con el ratón o usa las flechas del gizmo. Flechas del teclado: mover · RePág/AvPág: subir/bajar · Shift: paso ×4.'
+            : 'Elige una pregunta en “Preguntas” o en el selector de objeto. [ y ] cambian de nivel.'}
       </p>
+    </div>
+  )
+}
+
+function IssuesBadge({ issues, errorCount }: { issues: LevelIssue[]; errorCount: number }) {
+  const [open, setOpen] = useState(false)
+  const warnings = issues.length - errorCount
+  return (
+    <div className={`editor-issues ${errorCount > 0 ? 'has-errors' : ''}`}>
+      <button type="button" onClick={() => setOpen(!open)}>
+        {errorCount > 0 ? `${errorCount} error${errorCount === 1 ? '' : 'es'}` : ''}
+        {errorCount > 0 && warnings > 0 ? ' · ' : ''}
+        {warnings > 0 ? `${warnings} aviso${warnings === 1 ? '' : 's'}` : ''}
+      </button>
+      {open && (
+        <ul>
+          {issues.map((issue, index) => (
+            <li key={index} className={issue.severity}>
+              <button
+                type="button"
+                onClick={() => {
+                  pick(issue.target)
+                  setOpen(false)
+                }}
+              >
+                {issue.text}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -511,7 +618,12 @@ function Inspector({ onShowQuestions }: { onShowQuestions: () => void }) {
       <>
         <h3>Checkpoint</h3>
         <VecField label="Posición" value={checkpoint.position} onChange={(position) => patch({ position })} />
-        <NumField label="Ancho" value={checkpoint.width ?? 8} onChange={(width) => patch({ width })} />
+        <NumField
+          label="Ancho"
+          min={1.5}
+          value={checkpoint.width ?? DEFAULT_CHECKPOINT_WIDTH}
+          onChange={(width) => patch({ width })}
+        />
       </>
     )
   }
@@ -520,7 +632,12 @@ function Inspector({ onShowQuestions }: { onShowQuestions: () => void }) {
       <>
         <h3>Meta</h3>
         <VecField label="Posición" value={draft.goal.position} onChange={(position) => patch({ position })} />
-        <VecField label="Tamaño" value={draft.goal.size ?? [4, 3, 2]} onChange={(size) => patch({ size })} />
+        <VecField
+          label="Tamaño"
+          min={0.2}
+          value={draft.goal.size ?? DEFAULT_GOAL_SIZE}
+          onChange={(size) => patch({ size })}
+        />
       </>
     )
   }
@@ -561,7 +678,7 @@ function PlatformInspector({ platform }: { platform: PlatformDef }) {
         <input type="color" value={toColor(platform.color)} onChange={(event) => patch({ color: event.target.value })} />
       </label>
       <VecField label="Posición" value={platform.position} onChange={(position) => patch({ position })} />
-      <VecField label="Tamaño" value={platform.size} onChange={(size) => patch({ size })} />
+      <VecField label="Tamaño" min={0.2} value={platform.size} onChange={(size) => patch({ size })} />
       {(kind === 'moving' || platform.motion) && (
         <MotionFields motion={platform.motion} onChange={(motion) => patch({ motion })} />
       )}
@@ -631,7 +748,13 @@ function ChallengeInspector({
           )
         })}
       </div>
-      <NumField label="Segundos" value={challenge.timeLimit ?? 15} onChange={(timeLimit) => patch({ timeLimit })} />
+      <NumField
+        label="Segundos"
+        min={3}
+        max={120}
+        value={challenge.timeLimit ?? 15}
+        onChange={(timeLimit) => patch({ timeLimit })}
+      />
       <label className="editor-check">
         <input
           type="checkbox"
@@ -656,6 +779,7 @@ function ChallengeInspector({
         <VecField label="Origen" value={challenge.origin} onChange={(origin) => patch({ origin })} />
         <VecField
           label="Tamaño de cada pad"
+          min={0.2}
           value={challenge.platformSize ?? [4.5, 0.72, 4.6]}
           onChange={(platformSize) => patch({ platformSize })}
         />
@@ -680,9 +804,17 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
         </select>
       </label>
       <VecField label="Posición" value={obstacle.position} onChange={(position) => patch({ position })} />
-      <VecField label="Tamaño" value={obstacle.size ?? [1.6, 1.6, 1.6]} onChange={(size) => patch({ size })} />
+      {obstacleUsesSize(obstacle.kind) && (
+        <VecField
+          label="Tamaño"
+          min={0.2}
+          value={obstacle.size ?? defaultObstacleSize(obstacle.kind)}
+          onChange={(size) => patch({ size })}
+        />
+      )}
       <NumField
         label={isFan ? 'Velocidad aspas' : 'Velocidad'}
+        min={0}
         value={obstacle.speed ?? 1}
         onChange={(speed) => patch({ speed })}
       />
@@ -697,21 +829,25 @@ function ObstacleInspector({ obstacle }: { obstacle: ObstacleDef }) {
           <p className="muted">Ejes del nivel: X lateral · Z adelante (W). Ej.: [0,0,1] empuja hacia delante · [0,0,-1] hacia atrás.</p>
           <NumField
             label="Fuerza del viento"
+            min={0}
             value={obstacle.fanForce ?? obstacle.speed ?? 1}
             onChange={(fanForce) => patch({ fanForce })}
           />
           <NumField
             label="Alcance (adelante)"
+            min={0.5}
             value={obstacle.fanReach ?? obstacle.fanRadius ?? 8}
             onChange={(fanReach) => patch({ fanReach })}
           />
           <NumField
             label="Ancho (lateral)"
+            min={0.5}
             value={obstacle.fanSpread ?? 5.5}
             onChange={(fanSpread) => patch({ fanSpread })}
           />
           <NumField
             label="Altura (arriba/abajo)"
+            min={0.5}
             value={obstacle.fanHeight ?? 2.8}
             onChange={(fanHeight) => patch({ fanHeight })}
           />
@@ -752,11 +888,13 @@ function MotionFields({
       </label>
       <NumField
         label="Amplitud"
+        min={0}
         value={value.amplitude}
         onChange={(amplitude) => onChange(patchMotion(value, 'amplitude', amplitude) as NonNullable<PlatformDef['motion']>)}
       />
       <NumField
         label="Velocidad"
+        min={0}
         value={value.speed ?? 1}
         onChange={(speed) => onChange(patchMotion(value, 'speed', speed) as NonNullable<PlatformDef['motion']>)}
       />
@@ -769,21 +907,64 @@ function MotionFields({
   )
 }
 
-function VecField({ label, value, onChange }: { label: string; value: Vec3; onChange: (value: Vec3) => void }) {
+function NumberInput({
+  value,
+  step,
+  min,
+  max,
+  onCommit,
+}: {
+  value: number
+  step: number
+  min?: number
+  max?: number
+  onCommit: (value: number) => void
+}) {
+  const [text, setText] = useState<string | null>(null)
+  const shown = Number.isFinite(value) ? String(value) : '0'
+  return (
+    <input
+      type="number"
+      step={step}
+      min={min}
+      max={max}
+      value={text ?? shown}
+      onChange={(event) => {
+        setText(event.target.value)
+        const next = Number(event.target.value)
+        if (event.target.value.trim() === '' || !Number.isFinite(next)) return
+        if ((min != null && next < min) || (max != null && next > max)) return
+        onCommit(next)
+      }}
+      onBlur={() => setText(null)}
+    />
+  )
+}
+
+function VecField({
+  label,
+  value,
+  min,
+  onChange,
+}: {
+  label: string
+  value: Vec3
+  min?: number
+  onChange: (value: Vec3) => void
+}) {
   return (
     <div className="editor-vec">
       <span>{label}</span>
       {value.map((n, index) => (
-        <input
+        <NumberInput
           key={index}
-          type="number"
           step={0.5}
-          value={Number.isFinite(n) ? n : 0}
-          onChange={(event) => {
-            const next: Vec3 = [...value]
-            next[index] = Number(event.target.value)
-            if (!Number.isFinite(next[index])) return
-            onChange(next)
+          min={min}
+          value={n}
+          onCommit={(next) => {
+            const vec: Vec3 = [...value]
+            vec[index] = next
+            onChange(vec)
           }}
         />
       ))}
@@ -791,20 +972,23 @@ function VecField({ label, value, onChange }: { label: string; value: Vec3; onCh
   )
 }
 
-function NumField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+function NumField({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string
+  value: number
+  min?: number
+  max?: number
+  onChange: (value: number) => void
+}) {
   return (
     <label>
       {label}
-      <input
-        type="number"
-        step={0.1}
-        value={Number.isFinite(value) ? value : 0}
-        onChange={(event) => {
-          const next = Number(event.target.value)
-          if (!Number.isFinite(next)) return
-          onChange(next)
-        }}
-      />
+      <NumberInput step={0.1} min={min} max={max} value={value} onCommit={onChange} />
     </label>
   )
 }

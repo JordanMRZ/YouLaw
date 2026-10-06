@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
-import { Color, InstancedMesh, Object3D } from 'three'
+import { InstancedMesh, Object3D } from 'three'
 import { useGameStore } from '../../store/gameStore'
 
 const dummy = new Object3D()
@@ -37,7 +37,7 @@ export function BurstFX() {
   return (
     <instancedMesh ref={mesh} args={[undefined, undefined, 18]}>
       <sphereGeometry args={[1, 6, 6]} />
-      <meshBasicMaterial color={new Color(color)} />
+      <meshBasicMaterial color={color} />
     </instancedMesh>
   )
 }

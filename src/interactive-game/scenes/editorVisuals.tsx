@@ -1,8 +1,11 @@
-import { Sparkles } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef, type ReactNode } from 'react'
 import type { Group } from 'three'
+import { CheckpointFrame, checkpointSensorWidth } from '../components/Checkpoint'
+import { GoalFrame } from '../components/Goal'
+import { DEFAULT_CHECKPOINT_WIDTH, DEFAULT_GOAL_SIZE } from '../data/defaults'
 import { WorldLabel } from '../components/WorldLabel'
+import { VanishCountdown } from '../components/platforms/VanishCountdown'
 import type {
   ChallengeDef,
   CheckpointDef,
@@ -16,6 +19,8 @@ import { PlayerVisual } from '../player/PlayerVisual'
 import { fanBlowQuaternion, fanHeightHalf, fanReach, fanSpread } from '../game/fanWind'
 import { useGameStore } from '../store/gameStore'
 import { selectionKey, useEditorStore } from '../store/editorStore'
+
+function noRaycast() {}
 
 export function Selectable({
   selected: _selected,
@@ -111,12 +116,7 @@ export function EditorPlatform({
           </>
         )}
         {kind === 'vanishing' && (
-          <group position={[0, h / 2 + 0.12, 0]}>
-            <mesh castShadow>
-              <coneGeometry args={[w * 0.12, h * 0.24, 3]} />
-              <meshStandardMaterial color="#ffd166" emissive="#ffb703" emissiveIntensity={0.4} />
-            </mesh>
-          </group>
+          <VanishCountdown seconds={3} width={w} depth={d} y={h * 0.52 + 0.05} />
         )}
         {selected && <SelectionBox size={def.size} />}
       </Selectable>
@@ -196,8 +196,9 @@ export function EditorChallenge({
               position={[0, size[1] * 0.5 + 1.05, 0]}
               width={option.word.length > 10 ? 5.6 : 4.2}
               color={correct ? '#b8ffd9' : '#ffffff'}
+              plate="rgba(16, 32, 48, 0.62)"
             />
-            {correct && <WorldLabel text="CORRECTA" position={[0, size[1] * 0.5 + 1.55, 0]} width={3.2} color="#b8ffd9" />}
+            {correct && <WorldLabel text="CORRECTA" position={[0, size[1] * 0.5 + 1.8, 0]} width={3.2} color="#b8ffd9" />}
             {selected && <SelectionBox size={size} />}
           </group>
         )
@@ -300,11 +301,11 @@ function FanVisual({ def, preview }: { def: ObstacleDef; preview: boolean }) {
         </mesh>
       </group>
       <group quaternion={arrowQuat}>
-        <mesh position={[reach / 2, 0, 0]}>
+        <mesh position={[reach / 2, 0, 0]} raycast={noRaycast}>
           <boxGeometry args={[reach, height * 2, spread * 2]} />
           <meshBasicMaterial color="#9ad7ff" transparent opacity={0.12} depthWrite={false} wireframe />
         </mesh>
-        <mesh position={[reach / 2, 0, 0]}>
+        <mesh position={[reach / 2, 0, 0]} raycast={noRaycast}>
           <boxGeometry args={[reach, height * 2, spread * 2]} />
           <meshBasicMaterial color="#ffd166" transparent opacity={0.06} depthWrite={false} />
         </mesh>
@@ -370,7 +371,7 @@ export function EditorCoin({ def, selected }: { def: CoinDef; selected: boolean 
 }
 
 export function EditorCheckpoint({ def, selected }: { def: CheckpointDef; selected: boolean }) {
-  const width = def.width ?? 12
+  const width = def.width ?? DEFAULT_CHECKPOINT_WIDTH
   return (
     <group
       position={def.position}
@@ -381,22 +382,10 @@ export function EditorCheckpoint({ def, selected }: { def: CheckpointDef; select
       }}
     >
       <mesh>
-        <boxGeometry args={[Math.min(width - 1, 12), 3.2, 0.6]} />
+        <boxGeometry args={[checkpointSensorWidth(width), 3.2, 0.6]} />
         <meshLambertMaterial color="#3ee0b3" transparent opacity={0.18} />
       </mesh>
-      <mesh position={[-(width * 0.38), 0.2, 0]}>
-        <boxGeometry args={[0.28, 3.4, 0.28]} />
-        <meshLambertMaterial color="#1f6f8b" />
-      </mesh>
-      <mesh position={[width * 0.38, 0.2, 0]}>
-        <boxGeometry args={[0.28, 3.4, 0.28]} />
-        <meshLambertMaterial color="#1f6f8b" />
-      </mesh>
-      <mesh position={[0, 1.7, 0]}>
-        <boxGeometry args={[width * 0.72, 0.28, 0.28]} />
-        <meshLambertMaterial color="#ffd166" />
-      </mesh>
-      <WorldLabel text="CHECKPOINT" position={[0, 2.2, 0.2]} width={5.2} color="#ffd166" />
+      <CheckpointFrame width={width} />
       {selected && <SelectionBox size={[width, 3.4, 1.2]} />}
     </group>
   )
@@ -404,7 +393,7 @@ export function EditorCheckpoint({ def, selected }: { def: CheckpointDef; select
 
 export function EditorGoal({
   position,
-  size,
+  size = DEFAULT_GOAL_SIZE,
   selected,
 }: {
   position: Vec3
@@ -421,24 +410,11 @@ export function EditorGoal({
       }}
     >
       <mesh>
-        <boxGeometry args={[8, 4.2, 1.2]} />
+        <boxGeometry args={size} />
         <meshLambertMaterial color="#ffd166" transparent opacity={0.16} />
       </mesh>
-      <mesh position={[-3.8, 0.4, 0]} castShadow>
-        <boxGeometry args={[0.5, 4.4, 0.5]} />
-        <meshLambertMaterial color="#f4a261" />
-      </mesh>
-      <mesh position={[3.8, 0.4, 0]} castShadow>
-        <boxGeometry args={[0.5, 4.4, 0.5]} />
-        <meshLambertMaterial color="#f4a261" />
-      </mesh>
-      <mesh position={[0, 2.5, 0]} castShadow>
-        <boxGeometry args={[8.2, 0.7, 0.6]} />
-        <meshLambertMaterial color="#e76f51" />
-      </mesh>
-      <WorldLabel text="GOAL" position={[0, 2.6, 0.45]} width={4.4} color="#fff7e6" />
-      <Sparkles count={18} scale={[6, 3, 2]} size={4} speed={0.4} color="#ffd166" />
-      {selected && <SelectionBox size={size ?? [8, 4.4, 1.4]} />}
+      <GoalFrame size={size} />
+      {selected && <SelectionBox size={size} />}
     </group>
   )
 }
@@ -485,7 +461,7 @@ function PlatformFeet({ w, h, d }: { w: number; h: number; d: number }) {
 
 function SelectionBox({ size }: { size: Vec3 }) {
   return (
-    <mesh>
+    <mesh raycast={noRaycast}>
       <boxGeometry args={[size[0] + 0.16, size[1] + 0.16, size[2] + 0.16]} />
       <meshBasicMaterial color="#ffffff" wireframe transparent opacity={0.75} />
     </mesh>
@@ -505,7 +481,7 @@ export function MotionGhost({ position, motion }: { position: Vec3; motion: Moti
   const size: Vec3 =
     motion.axis === 'x' ? [amp * 2, 0.08, 0.08] : motion.axis === 'y' ? [0.08, amp * 2, 0.08] : [0.08, 0.08, amp * 2]
   return (
-    <mesh position={position}>
+    <mesh position={position} raycast={noRaycast}>
       <boxGeometry args={size} />
       <meshBasicMaterial color="#ffffff" transparent opacity={0.28} />
     </mesh>

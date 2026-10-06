@@ -8,6 +8,7 @@ import {
   youLawAccessDeniedMessage,
 } from './authRoles'
 import { setActiveProgressUser } from './progressScope'
+import { syncDidacticSaveWithAccount } from './didacticProgressService'
 
 export function cedulaToAuthEmail(cedula) {
   return `${cedula}@atav.com`
@@ -71,6 +72,11 @@ async function loadSessionForCedula(cedula) {
 
 function applySession(session) {
   setActiveProgressUser(session?.userId ?? null)
+  if (session?.userId) {
+    syncDidacticSaveWithAccount().catch((error) => {
+      console.warn('No se pudo sincronizar el progreso didáctico.', error)
+    })
+  }
 }
 
 export function subscribeAuth(onSession) {

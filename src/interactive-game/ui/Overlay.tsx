@@ -16,6 +16,11 @@ export function Overlay() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const state = useGameStore.getState()
+      if (event.code === 'KeyP' && !event.repeat && !state.mistake) {
+        if (state.phase === 'play') state.setPhase('paused')
+        else if (state.phase === 'paused') state.setPhase('play')
+        return
+      }
       if (event.code === 'Escape') {
         if (state.phase === 'editor') return
         if (state.mistake) return
@@ -235,8 +240,24 @@ function HUD() {
     <>
       <div className="hud-top">
         <div className="lives">{'❤️'.repeat(Math.max(0, lives))}{'🖤'.repeat(Math.max(0, 3 - lives))}</div>
-        <div className={`streak ${streak >= 2 ? 'hot' : ''}`}>{streak >= 2 ? `STREAK x${streak}` : 'STREAK x0'}</div>
-        <div className="time">{coins} 🪙 · {formatTime(elapsed)}</div>
+        <div className={`streak ${streak >= 2 ? 'hot' : ''}`}>RACHA x{streak}</div>
+        <div className="hud-right">
+          <div className="time">{coins} 🪙 · {formatTime(elapsed)}</div>
+          {phase === 'play' && !mistake && (
+            <button
+              type="button"
+              className="hud-pause"
+              aria-label="Pausa"
+              title="Pausa (Esc o P)"
+              onClick={(event) => {
+                event.currentTarget.blur()
+                useGameStore.getState().setPhase('paused')
+              }}
+            >
+              ❚❚
+            </button>
+          )}
+        </div>
       </div>
       {prompt && (
         <div className="question-bar">
@@ -269,20 +290,20 @@ function IntroCard() {
     <div className="modal">
       <p className="kicker">{level.hubLabel}</p>
       <h2>
-        Level {String(level.id).padStart(2, '0')}
+        Nivel {String(level.id).padStart(2, '0')}
       </h2>
       <h3>{level.name}</h3>
       <p>{level.subtitle}</p>
       <p className="theme">{level.theme}</p>
-      <p className="hint">W run · A D strafe · Space jump · Shift sprint · Esc pause</p>
+      <p className="hint">W avanzar · A D moverse a los lados · Espacio saltar · Shift correr · Esc o P pausa</p>
       <button type="button" className="primary" onClick={() => {
         (document.activeElement as HTMLElement | null)?.blur()
         useGameStore.getState().setPhase('countdown')
       }}>
-        Start
+        Empezar
       </button>
       <button type="button" onClick={() => useGameStore.getState().backToHub()}>
-        Hub
+        Mapa
       </button>
     </div>
   )
@@ -291,7 +312,7 @@ function IntroCard() {
 function Countdown() {
   const [value, setValue] = useState('3')
   useEffect(() => {
-    const steps = ['3', '2', '1', 'GO!']
+    const steps = ['3', '2', '1', '¡YA!']
     let i = 0
     audio.play('countdown')
     const id = window.setInterval(() => {
@@ -308,9 +329,9 @@ function Countdown() {
         useGameStore.getState().setPhase('play')
         return
       }
-      const next = steps[i] ?? 'GO!'
+      const next = steps[i] ?? '¡YA!'
       setValue(next)
-      audio.play(next === 'GO!' ? 'go' : 'countdown')
+      audio.play(next === '¡YA!' ? 'go' : 'countdown')
     }, 700)
     return () => window.clearInterval(id)
   }, [])
@@ -321,12 +342,15 @@ function PauseCard() {
   const editorReturn = useGameStore((s) => s.editorReturn)
   return (
     <div className="modal">
-      <h2>Paused</h2>
+      <h2>Pausa</h2>
       <button type="button" className="primary" onClick={() => useGameStore.getState().setPhase('play')}>
-        Resume
+        Continuar
+      </button>
+      <button type="button" onClick={() => useGameStore.getState().startLevel(useGameStore.getState().levelId)}>
+        Reiniciar nivel
       </button>
       <button type="button" onClick={() => useGameStore.getState().backToHub()}>
-        {editorReturn ? 'Editor' : 'Hub'}
+        {editorReturn ? 'Editor' : 'Mapa'}
       </button>
     </div>
   )
@@ -339,26 +363,26 @@ function ResultsCard() {
   if (!results) return null
   return (
     <div className="modal">
-      <p className="kicker">LEVEL COMPLETE</p>
+      <p className="kicker">NIVEL COMPLETADO</p>
       <h2>{starLine(results.stars)}</h2>
       <ul className="stats">
-        <li>Accuracy {Math.round(results.accuracy * 100)}%</li>
-        <li>Time {formatTime(results.time)}</li>
-        <li>Mistakes {results.mistakes}</li>
-        <li>Best Streak x{results.bestStreak}</li>
+        <li>Precisión {Math.round(results.accuracy * 100)}%</li>
+        <li>Tiempo {formatTime(results.time)}</li>
+        <li>Errores {results.mistakes}</li>
+        <li>Mejor racha x{results.bestStreak}</li>
       </ul>
       <p className="xp-chip">+{results.xp} XP</p>
       <div className="row">
         {!editorReturn && levelId < LEVEL_COUNT && (
           <button type="button" className="primary" onClick={() => useGameStore.getState().startLevel(levelId + 1)}>
-            Next level
+            Siguiente nivel
           </button>
         )}
         <button type="button" onClick={() => useGameStore.getState().startLevel(levelId)}>
-          Replay
+          Repetir
         </button>
         <button type="button" onClick={() => useGameStore.getState().backToHub()}>
-          {editorReturn ? 'Editor' : 'Hub'}
+          {editorReturn ? 'Editor' : 'Mapa'}
         </button>
       </div>
     </div>
@@ -386,15 +410,15 @@ function FailCard() {
   const editorReturn = useGameStore((s) => s.editorReturn)
   return (
     <div className="modal">
-      <h2>LEVEL FAILED</h2>
+      <h2>NIVEL FALLIDO</h2>
       <p>Se agotaron las 3 vidas.</p>
       {lastExplanation && <p className="explain-text">{lastExplanation}</p>}
       <div className="row">
         <button type="button" className="primary" onClick={() => useGameStore.getState().startLevel(levelId)}>
-          Restart
+          Reintentar
         </button>
         <button type="button" onClick={() => useGameStore.getState().backToHub()}>
-          {editorReturn ? 'Editor' : 'Hub'}
+          {editorReturn ? 'Editor' : 'Mapa'}
         </button>
       </div>
     </div>
@@ -407,21 +431,23 @@ function CreditsCard() {
   if (!results) return null
   return (
     <div className="modal wide">
-      <p className="kicker">CONGRATULATIONS</p>
+      <p className="kicker">¡FELICIDADES!</p>
       <h2>ENGLISH BRIDGE</h2>
-      <h3>50 LEVELS · 10 WORLDS</h3>
+      <h3>
+        {LEVEL_COUNT} NIVELES · {WORLD_COUNT} MUNDOS
+      </h3>
       <ul className="stats">
-        <li>Run time {formatTime(results.time)}</li>
-        <li>Accuracy {Math.round(results.accuracy * 100)}%</li>
-        <li>Mistakes {results.mistakes}</li>
-        <li>Best streak x{results.bestStreak}</li>
-        <li>Stars {starLine(results.stars)}</li>
-        <li>Career {save.totals.stars} stars · {save.xp} XP</li>
+        <li>Tiempo {formatTime(results.time)}</li>
+        <li>Precisión {Math.round(results.accuracy * 100)}%</li>
+        <li>Errores {results.mistakes}</li>
+        <li>Mejor racha x{results.bestStreak}</li>
+        <li>Estrellas {starLine(results.stars)}</li>
+        <li>Total {save.totals.stars} estrellas · {save.xp} XP</li>
       </ul>
       <p className="xp-chip">+{results.xp} XP</p>
       <div className="row">
         <button type="button" className="primary" onClick={() => useGameStore.getState().backToHub()}>
-          Return to hub
+          Volver al mapa
         </button>
       </div>
     </div>
@@ -439,10 +465,10 @@ function SettingsPanel() {
           checked={settings.muted}
           onChange={(e) => useGameStore.getState().updateSettings({ muted: e.target.checked })}
         />
-        Mute
+        Silenciar
       </label>
       <label>
-        SFX
+        Efectos
         <input
           type="range"
           min={0}
@@ -453,7 +479,7 @@ function SettingsPanel() {
         />
       </label>
       <label>
-        Music
+        Música
         <input
           type="range"
           min={0}
@@ -464,7 +490,7 @@ function SettingsPanel() {
         />
       </label>
       <button type="button" onClick={() => useGameStore.getState().setSettingsOpen(false)}>
-        Close
+        Cerrar
       </button>
     </div>
   )

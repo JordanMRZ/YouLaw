@@ -1,6 +1,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { exercises, lessonExercisesById, lessonsByLevel } from '../data/mockData'
 import { getProgress, saveProgress } from '../services/localStorage'
+import { displayedStreak, recordDailyPractice } from '../services/dailyStreak'
 import { activeProgressUserId } from '../services/progressScope'
 
 const levelRank = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 }
@@ -8,6 +9,7 @@ const lifeLockDurationMs = 2 * 60 * 1000
 
 export function useLearningProgress() {
   const totalXp = ref(340)
+  const streak = ref(0)
   const learningLevel = ref('A1')
   const lives = ref(3)
   const lockUntil = ref(null)
@@ -24,7 +26,17 @@ export function useLearningProgress() {
   const consecutiveCorrect = ref(0)
   const showStreakCelebration = ref(false)
   let lastCorrectOptionIndex = -1
-  const lessons = computed(() => lessonsByLevel[learningLevel.value] || lessonsByLevel.A1)
+  const lessons = computed(() => {
+    const source = lessonsByLevel[learningLevel.value] || lessonsByLevel.A1
+    const completed = new Set(completedLessons.value)
+    const firstOpen = source.findIndex((lesson) => !completed.has(lesson.id))
+    return source.map((lesson, index) => {
+      let state = 'locked'
+      if (completed.has(lesson.id)) state = 'done'
+      else if (index === firstOpen) state = 'current'
+      return { ...lesson, state }
+    })
+  })
   const availableExercises = computed(() => {
     const lessonExercises = selectedLesson.value ? lessonExercisesById[selectedLesson.value.id] : null
     return lessonExercises || exercises.filter((exercise) => exercise.difficulty === learningLevel.value)
@@ -55,6 +67,10 @@ export function useLearningProgress() {
     lockRemainingSeconds.value = Math.ceil(remainingMs / 1000)
   }
 
+  function refreshStreak() {
+    streak.value = displayedStreak(getProgress())
+  }
+
   let lockTimer = null
 
   function loadFromStorage() {
@@ -64,7 +80,14 @@ export function useLearningProgress() {
     lives.value = Number(savedProgress.lives ?? 3)
     lockUntil.value = savedProgress.lockUntil || null
     completedLessons.value = savedProgress.completedLessons || []
+    refreshStreak()
     syncLockState()
+  }
+
+  function markDailyStreak() {
+    const next = recordDailyPractice(getProgress())
+    streak.value = next.streak
+    saveProgress({ streak: next.streak, lastStreakDate: next.lastStreakDate })
   }
 
   watch(activeProgressUserId, (userId) => {
@@ -73,7 +96,11 @@ export function useLearningProgress() {
 
   onMounted(() => {
     syncLockState()
-    lockTimer = window.setInterval(syncLockState, 1000)
+    refreshStreak()
+    lockTimer = window.setInterval(() => {
+      syncLockState()
+      refreshStreak()
+    }, 1000)
   })
 
   onBeforeUnmount(() => {
@@ -176,11 +203,9 @@ export function useLearningProgress() {
       }
 
       if (!completedLessons.value.includes(selectedLesson.value.id)) completedLessons.value.push(selectedLesson.value.id)
-      selectedLesson.value.state = 'done'
       const currentLessonIndex = lessons.value.findIndex((lesson) => lesson.id === selectedLesson.value.id)
-      const nextLesson = lessons.value[currentLessonIndex + 1]
-      if (nextLesson && nextLesson.state === 'locked') nextLesson.state = 'current'
       totalXp.value += 20
+      markDailyStreak()
       saveProgress({ xp: totalXp.value, completedLessons: completedLessons.value, lives: lives.value, lockUntil: lockUntil.value })
       const completedA1 = selectedLesson.value.level === 'A1' && currentLessonIndex === lessons.value.length - 1
       lessonSummary.value = { title: selectedLesson.value.title, xp: 20, nextLevel: completedA1 ? 'A2' : null }
@@ -203,14 +228,12 @@ export function useLearningProgress() {
 
   function resetLearningProgress() {
     totalXp.value = 340
+    streak.value = 0
     learningLevel.value = 'A1'
     lives.value = 3
     lockUntil.value = null
     lockRemainingSeconds.value = 0
     completedLessons.value = []
-    Object.values(lessonsByLevel).forEach((levelLessons) => {
-      levelLessons.forEach((lesson, index) => { lesson.state = index === 0 ? 'current' : 'locked' })
-    })
     selectedLesson.value = null
     selectedAnswer.value = null
     answerStatus.value = null
@@ -222,11 +245,12 @@ export function useLearningProgress() {
     lessonSummary.value = null
     consecutiveCorrect.value = 0
     showStreakCelebration.value = false
-    saveProgress({ xp: totalXp.value, lives: lives.value, lockUntil: null, completedLessons: completedLessons.value })
+    saveProgress({ xp: totalXp.value, streak: 0, lastStreakDate: null, lives: lives.value, lockUntil: null, completedLessons: completedLessons.value })
   }
 
   return {
     totalXp,
+    streak,
     learningLevel,
     lives,
     lockUntil,

@@ -184,7 +184,7 @@ export function createLevel13(): LevelDef {
         ],
         correctAnswer: "STARTS",
         platformSize: [4.5, 0.72, 4.6],
-        sentence: "The lesson ___ at 10:30 everyday",
+        sentence: "The lesson ___ at 10:30 every day",
         timeLimit: 15,
         explanation: "Es un hábito regular, por eso usamos presente simple con “starts”"
       },
@@ -208,7 +208,7 @@ export function createLevel13(): LevelDef {
         ],
         correctAnswer: "WE WILL",
         platformSize: [4.5, 0.72, 4.6],
-        sentence: "If the lesson finisihes early, _____ go home.",
+        sentence: "If the lesson finishes early, _____ go home.",
         timeLimit: 15
       }
     ],

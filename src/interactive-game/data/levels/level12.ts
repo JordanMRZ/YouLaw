@@ -163,7 +163,7 @@ export function createLevel12(): LevelDef {
         ],
         correctAnswer: "HAS REVIEWED",
         platformSize: [4.5, 0.72, 4.6],
-        sentence: "The comittee ______ the proposal before the deadline.",
+        sentence: "The committee ______ the proposal before the deadline.",
         timeLimit: 15
       },
       {

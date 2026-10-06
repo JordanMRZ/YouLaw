@@ -80,7 +80,7 @@ function Fan({ def }: { def: ObstacleDef }) {
       playerRuntime.windForce.y += iy
       playerRuntime.windForce.z += iz
     }
-  }, 1)
+  }, -1)
 
   return (
     <RigidBody ref={blades} type="kinematicPosition" position={def.position} colliders={false} sensor>

@@ -211,6 +211,8 @@ export interface SaveData {
     bestStreak: number
     stars: number
   }
+  /** Marca de la última escritura local; decide qué cosméticos y ajustes ganan al fusionar. */
+  savedAt?: number
 }
 
 export interface SaveAdapter {

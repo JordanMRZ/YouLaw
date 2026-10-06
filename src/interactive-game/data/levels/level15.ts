@@ -174,7 +174,7 @@ export function createLevel15(): LevelDef {
         ],
         correctAnswer: "AFTER",
         platformSize: [4.5, 0.72, 4.6],
-        sentence: "We finish the ____ after lunch.",
+        sentence: "We finish the task ____ lunch.",
         timeLimit: 15,
         audioText: "We finish the task after lunch."
       }
