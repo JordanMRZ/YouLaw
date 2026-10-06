@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { navigation } from './data/mockData'
 import { useLearningProgress } from './composables/useLearningProgress'
 import Sidebar from './components/layout/Sidebar.vue'
@@ -91,23 +91,13 @@ function beginDiagnostic() {
   startDiagnosticTest()
 }
 
-function openDashboardLesson(lesson) {
-  if (!diagnosticReady.value) {
-    startLevelCheck()
-    return
-  }
-  openLesson(lesson)
-  currentFlow.value = 'lessonPreparation'
-}
-
 function openLibraryLesson(lesson) {
   if (!diagnosticReady.value) {
     startLevelCheck()
     return
   }
   openLesson(lesson)
-  startLesson()
-  currentFlow.value = 'lesson'
+  currentFlow.value = 'lessonPreparation'
 }
 
 function handleLessonAnswer(option) {
@@ -122,7 +112,7 @@ function handleLessonAnswer(option) {
 
 function continueFromDiagnostic() {
   currentFlow.value = 'dashboard'
-  nextTick(() => document.getElementById('learning-path')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  activeSection.value = 'Inicio'
 }
 
 function closeFlow() {
@@ -163,10 +153,6 @@ function advanceToLevel(level) {
   currentFlow.value = 'dashboard'
 }
 
-function scrollToLearningPath() {
-  nextTick(() => document.getElementById('learning-path')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
-}
-
 watch(isComplete, (complete) => {
   if (complete) currentFlow.value = 'diagnosticResult'
 })
@@ -189,7 +175,7 @@ watch(lessonSummary, (summary) => {
       <TopBar v-if="activeSection !== 'Didactico'" :user-name="user?.name" :show-lives="diagnosticReady" :lives="lives" :max-lives="maxLives" :life-shake="lifeShake" :is-locked="isLivesLocked" :lock-remaining-seconds="lockRemainingSeconds" />
       <DidacticView v-if="activeSection === 'Didactico'" />
       <InitialAssessmentView v-else-if="!diagnosticReady" :on-start-diagnostic="startLevelCheck" @reset="resetAllProgress" />
-      <DashboardView v-else-if="activeSection === 'Inicio'" :lessons="learningLessons" :total-xp="totalXp" :diagnostic-completed="diagnosticReady" :english-level="englishLevel" :diagnostic-score="diagnosticScore" :lives="lives" :max-lives="maxLives" @select-lesson="openDashboardLesson" @show-lessons="navigate('Lecciones')" @start-diagnostic="startLevelCheck" @start-learning="scrollToLearningPath" @reassess="startLevelCheck" />
+      <DashboardView v-else-if="activeSection === 'Inicio'" :total-xp="totalXp" :diagnostic-completed="diagnosticReady" :english-level="englishLevel" :diagnostic-score="diagnosticScore" :lives="lives" :max-lives="maxLives" @show-lessons="navigate('Lecciones')" @start-diagnostic="startLevelCheck" @reassess="startLevelCheck" />
       <LessonsView v-else-if="activeSection === 'Lecciones'" :lessons="learningLessons" @select-lesson="openLibraryLesson" />
       <AchievementsView v-else-if="activeSection === 'Logros'" />
     </main>

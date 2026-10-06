@@ -170,11 +170,17 @@ onBeforeUnmount(() => {
   letter-spacing: -0.5px;
 }
 
+.streak-title-wrap {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 6px;
+}
+
 .celebration-subheading {
   color: #cbd5e1;
   font-size: 13.5px;
-  line-height: 1.4;
-  margin: 0 auto 10px;
+  line-height: 1.45;
+  margin: 0 auto 0;
   max-width: 380px;
 }
 
@@ -186,12 +192,20 @@ onBeforeUnmount(() => {
 /* Dancing Stage with lateral swaying animation */
 .dancing-stage {
   position: relative;
+  z-index: 1;
   width: 100%;
-  height: 220px;
+  min-height: 200px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   overflow: visible;
+  margin-top: 22px;
+  margin-bottom: 10px;
+  padding-top: 4px;
+}
+
+.dancing-stage :deep(.lawyer-speech-bubble) {
+  margin-top: 0;
   margin-bottom: 10px;
 }
 

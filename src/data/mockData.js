@@ -1,3 +1,5 @@
+import { getLessonCurriculumMeta } from './curriculumMap.js'
+
 export const navigation = [
   { label: 'Inicio' },
   { label: 'Lecciones' },
@@ -6,15 +8,22 @@ export const navigation = [
 ]
 
 function createLessons(level, titles) {
-  return titles.map((lesson, index) => ({
-    id: `${level}-${index + 1}`,
-    level,
-    number: String(index + 1).padStart(2, '0'),
-    title: lesson.title,
-    subtitle: lesson.subtitle,
-    state: index === 0 ? 'current' : 'locked',
-    color: ['coral', 'blue', 'yellow', 'mint'][index % 4],
-  }))
+  return titles.map((lesson, index) => {
+    const id = `${level}-${index + 1}`
+    const curriculum = getLessonCurriculumMeta(id)
+    return {
+      id,
+      level,
+      number: String(index + 1).padStart(2, '0'),
+      title: lesson.title,
+      subtitle: lesson.subtitle,
+      state: index === 0 ? 'current' : 'locked',
+      color: ['coral', 'blue', 'yellow', 'mint'][index % 4],
+      subjects: curriculum.subjects,
+      semesterHints: curriculum.semesterHints,
+      colombiaBridge: curriculum.colombiaBridge,
+    }
+  })
 }
 
 export const lessonsByLevel = {
@@ -205,6 +214,294 @@ export const lessonExercisesById = {
     { prompt: 'Choose the correct sentence.', options: ['The lawyer helps the client.', 'The lawyer help the client.', 'The lawyer helping client.'], correctAnswer: 'The lawyer helps the client.' },
     { prompt: 'The final decision in a trial is the ___.', options: ['judgment', 'pencil', 'chair'], correctAnswer: 'judgment' },
     { prompt: 'Complete: The formal proceedings are now ___.', options: ['concluded', 'concluding', 'conclude'], correctAnswer: 'concluded' },
+  ],
+
+  // ── A2 ──────────────────────────────────────────────────────────────────
+  'A2-1': [
+    { prompt: 'An "acquittal" means the defendant was found ___.', options: ['not guilty', 'guilty', 'in contempt'], correctAnswer: 'not guilty' },
+    { prompt: '"Bail" allows a person to leave custody before ___.', options: ['trial', 'conviction', 'sentencing'], correctAnswer: 'trial' },
+    { prompt: 'The word "accused" refers to a person who ___.', options: ['faces criminal charges', 'represents the court', 'witnesses a crime'], correctAnswer: 'faces criminal charges' },
+    { prompt: 'To "adjourn" a hearing means to ___.', options: ['postpone it', 'conclude it', 'open it'], correctAnswer: 'postpone it' },
+    { prompt: '"Perjury" is the crime of ___.', options: ['lying under oath', 'stealing from the court', 'bribing a judge'], correctAnswer: 'lying under oath' },
+  ],
+  'A2-2': [
+    { prompt: 'The person accused of a crime in court is called the ___.', options: ['defendant', 'plaintiff', 'bailiff'], correctAnswer: 'defendant' },
+    { prompt: 'A "bench trial" is decided by ___.', options: ['a judge', 'a jury', 'a panel of lawyers'], correctAnswer: 'a judge' },
+    { prompt: 'The "chambers" are the offices of ___.', options: ['a judge', 'a prosecutor', 'a clerk'], correctAnswer: 'a judge' },
+    { prompt: 'The "closing argument" is a summary of ___ presented to the jury.', options: ['the evidence', 'the verdict', 'the sentence'], correctAnswer: 'the evidence' },
+    { prompt: 'A "bailiff" is responsible for ___.', options: ['keeping order in court', 'deciding the verdict', 'filing documents'], correctAnswer: 'keeping order in court' },
+  ],
+  'A2-3': [
+    { prompt: '"Circumstantial evidence" is ___ evidence.', options: ['indirect', 'direct', 'written'], correctAnswer: 'indirect' },
+    { prompt: 'A "case file" contains every ___ filed in a case.', options: ['document', 'witness', 'verdict'], correctAnswer: 'document' },
+    { prompt: 'An "affidavit" is a ___.', options: ['sworn written statement of facts', 'court order', 'criminal charge'], correctAnswer: 'sworn written statement of facts' },
+    { prompt: '"Case law" is established through ___.', options: ['previous court decisions', 'legislation', 'executive orders'], correctAnswer: 'previous court decisions' },
+    { prompt: 'Evidence the court cannot consider is called ___.', options: ['inadmissible', 'admissible', 'corroborated'], correctAnswer: 'inadmissible' },
+  ],
+  'A2-4': [
+    { prompt: 'To "comply" with a court order means to ___.', options: ['obey it', 'appeal it', 'ignore it'], correctAnswer: 'obey it' },
+    { prompt: 'A "bench warrant" is issued by ___.', options: ['the court', 'the police', 'the prosecutor'], correctAnswer: 'the court' },
+    { prompt: 'A "subpoena" requires a person to ___.', options: ['appear in court', 'pay a fine', 'plead guilty'], correctAnswer: 'appear in court' },
+    { prompt: 'To "abide by" a ruling means to ___.', options: ['follow it', 'challenge it', 'dismiss it'], correctAnswer: 'follow it' },
+    { prompt: 'An "injunction" is a court order that ___.', options: ['stops or requires an action', 'starts a trial', 'defines a sentence'], correctAnswer: 'stops or requires an action' },
+  ],
+  'A2-5': [
+    { prompt: 'A "civil action" seeks ___.', options: ['money damages or equitable relief', 'criminal punishment', 'an arrest warrant'], correctAnswer: 'money damages or equitable relief' },
+    { prompt: 'The person who files a lawsuit is the ___.', options: ['plaintiff', 'defendant', 'bailiff'], correctAnswer: 'plaintiff' },
+    { prompt: 'An "allegation" is a claim that a party ___.', options: ['expects to prove', 'has already proven', 'has dismissed'], correctAnswer: 'expects to prove' },
+    { prompt: 'A "brief" is a ___.', options: ['written legal argument', 'type of hearing', 'form of punishment'], correctAnswer: 'written legal argument' },
+    { prompt: '"Litigation" refers to ___.', options: ['taking a dispute to court', 'signing a contract', 'filing an appeal'], correctAnswer: 'taking a dispute to court' },
+  ],
+  'A2-6': [
+    { prompt: 'The "clerk of court" manages the ___.', options: ['daily operations of the court', 'jury deliberations', 'criminal sentences'], correctAnswer: 'daily operations of the court' },
+    { prompt: 'A "U.S. attorney" is appointed by ___.', options: ['the President', 'the judge', 'the jury'], correctAnswer: 'the President' },
+    { prompt: 'An "attorney at law" is qualified to ___.', options: ['represent people in legal matters', 'make judicial decisions', 'arrest suspects'], correctAnswer: 'represent people in legal matters' },
+    { prompt: 'A "public defender" represents defendants who ___.', options: ['cannot afford a lawyer', 'have already appealed', 'are found guilty'], correctAnswer: 'cannot afford a lawyer' },
+    { prompt: 'A "bailiff" works inside ___.', options: ['a courtroom', 'a law firm', 'a prison'], correctAnswer: 'a courtroom' },
+  ],
+  'A2-7': [
+    { prompt: 'An "arraignment" is when a defendant ___.', options: ['is formally informed of charges', 'receives a sentence', 'appeals a verdict'], correctAnswer: 'is formally informed of charges' },
+    { prompt: 'An "alternate juror" only decides the case if ___.', options: ['called to replace a regular juror', 'the judge requests it', 'the defendant agrees'], correctAnswer: 'called to replace a regular juror' },
+    { prompt: 'A hearing is "adjourned" when it is ___.', options: ['postponed', 'concluded', 'dismissed'], correctAnswer: 'postponed' },
+    { prompt: '"Voir dire" is the process of ___.', options: ['selecting jurors', 'presenting evidence', 'delivering a verdict'], correctAnswer: 'selecting jurors' },
+    { prompt: 'During a preliminary hearing, the judge decides ___.', options: ['if there is enough evidence to proceed', 'the final sentence', 'who the jury will be'], correctAnswer: 'if there is enough evidence to proceed' },
+  ],
+  'A2-8': [
+    { prompt: 'To "testify" means to ___.', options: ['give evidence under oath', 'file a lawsuit', 'sign a contract'], correctAnswer: 'give evidence under oath' },
+    { prompt: 'To "plead guilty" means to ___.', options: ['admit to the crime', 'deny the charge', 'request a new trial'], correctAnswer: 'admit to the crime' },
+    { prompt: 'The defense "rests" when it ___.', options: ['finishes presenting its case', 'begins cross-examination', 'calls its first witness'], correctAnswer: 'finishes presenting its case' },
+    { prompt: 'A witness must ___.', options: ['tell the truth in court', 'decide the verdict', 'represent the defendant'], correctAnswer: 'tell the truth in court' },
+    { prompt: 'The judge instructed the jury to ___.', options: ['deliberate and reach a verdict', 'file a complaint', 'issue a warrant'], correctAnswer: 'deliberate and reach a verdict' },
+  ],
+  'A2-9': [
+    { prompt: 'A "verdict" is the final decision in ___.', options: ['a trial', 'an arraignment', 'a deposition'], correctAnswer: 'a trial' },
+    { prompt: 'A "misdemeanor" is less serious than ___.', options: ['a felony', 'a civil case', 'an appeal'], correctAnswer: 'a felony' },
+    { prompt: '"Due process" guarantees everyone a right to ___.', options: ['a fair legal procedure', 'a mandatory jury trial', 'free legal representation'], correctAnswer: 'a fair legal procedure' },
+    { prompt: 'A "plea bargain" is an agreement where the defendant ___.', options: ['pleads guilty for a lesser charge or sentence', 'requests a mistrial', 'waives the right to appeal'], correctAnswer: 'pleads guilty for a lesser charge or sentence' },
+    { prompt: '"Beyond a reasonable doubt" is the standard of proof in ___ cases.', options: ['criminal', 'civil', 'bankruptcy'], correctAnswer: 'criminal' },
+  ],
+  'A2-10': [
+    { prompt: '"Jurisdiction" refers to the court\'s ___.', options: ['authority to hear a case', 'duty to sentence the defendant', 'power to select the jury'], correctAnswer: 'authority to hear a case' },
+    { prompt: 'An "appellant" is the party who ___.', options: ['appeals a court decision', 'files the original lawsuit', 'represents the state'], correctAnswer: 'appeals a court decision' },
+    { prompt: 'A "class action" lawsuit is filed by ___.', options: ['a group on behalf of a larger class', 'a single plaintiff only', 'the government'], correctAnswer: 'a group on behalf of a larger class' },
+    { prompt: '"Habeas corpus" protects against ___.', options: ['unlawful detention', 'false testimony', 'contract fraud'], correctAnswer: 'unlawful detention' },
+    { prompt: 'The "appellee" is the party who ___.', options: ['opposes the appeal', 'files the appeal', 'hears the appeal'], correctAnswer: 'opposes the appeal' },
+  ],
+
+  // ── B1 ──────────────────────────────────────────────────────────────────
+  'B1-1': [
+    { prompt: 'A person who is "liable" is legally ___.', options: ['responsible for harm', 'free from all charges', 'entitled to compensation'], correctAnswer: 'responsible for harm' },
+    { prompt: '"Negligence" means failing to take ___.', options: ['reasonable care', 'legal action', 'proper testimony'], correctAnswer: 'reasonable care' },
+    { prompt: 'A "tort" is a ___.', options: ['civil wrong that causes harm', 'criminal offense', 'contractual obligation'], correctAnswer: 'civil wrong that causes harm' },
+    { prompt: 'To "indemnify" someone means to ___.', options: ['compensate them for a loss', 'accuse them of a crime', 'represent them in court'], correctAnswer: 'compensate them for a loss' },
+    { prompt: '"Damages" in a civil case refers to ___.', options: ['money awarded as compensation', 'a criminal sentence', 'a court injunction'], correctAnswer: 'money awarded as compensation' },
+  ],
+  'B1-2': [
+    { prompt: '"Alternative dispute resolution" settles a dispute ___.', options: ['outside the courtroom', 'in front of a jury', 'through criminal charges'], correctAnswer: 'outside the courtroom' },
+    { prompt: 'A "mediator" is a neutral party who ___.', options: ['helps parties reach an agreement', 'decides the outcome', 'prosecutes the case'], correctAnswer: 'helps parties reach an agreement' },
+    { prompt: '"Arbitration" differs from mediation because it is usually ___.', options: ['binding on the parties', 'informal and non-binding', 'decided by a jury'], correctAnswer: 'binding on the parties' },
+    { prompt: 'A "settlement" is an agreement reached ___.', options: ['before or during trial', 'after a verdict', 'at sentencing'], correctAnswer: 'before or during trial' },
+    { prompt: 'To "litigate" means to ___.', options: ['resolve a dispute through court', 'negotiate a contract', 'file a criminal charge'], correctAnswer: 'resolve a dispute through court' },
+  ],
+  'B1-3': [
+    { prompt: 'An "appeal" is a request for a ___.', options: ['higher court to review a decision', 'new trial by the same court', 'reduced sentence'], correctAnswer: 'higher court to review a decision' },
+    { prompt: 'When a court "affirms" a decision, it means ___.', options: ['the lower court was correct', 'the case must be retried', 'the verdict was wrong'], correctAnswer: 'the lower court was correct' },
+    { prompt: 'An "appellate court" has the power to ___.', options: ['review decisions of lower courts', 'hear cases for the first time', 'select juries'], correctAnswer: 'review decisions of lower courts' },
+    { prompt: 'When a decision is "reversed" on appeal, the court ___.', options: ['disagrees with the lower court', 'agrees with the lower court', 'sends the case to a new jury'], correctAnswer: 'disagrees with the lower court' },
+    { prompt: 'A "dissenting opinion" is written by a judge who ___.', options: ['disagrees with the majority decision', 'wrote the majority opinion', 'agreed with the verdict'], correctAnswer: 'disagrees with the majority decision' },
+  ],
+  'B1-4': [
+    { prompt: 'A lawyer\'s "duty of confidentiality" means they ___.', options: ['cannot reveal client information', 'must report all crimes', 'must testify against clients'], correctAnswer: 'cannot reveal client information' },
+    { prompt: '"Attorney-client privilege" protects ___.', options: ['communications between a lawyer and client', 'statements made in open court', 'evidence presented at trial'], correctAnswer: 'communications between a lawyer and client' },
+    { prompt: 'A "retainer" is a ___.', options: ['fee paid in advance to a lawyer', 'court order', 'form of legal defense'], correctAnswer: 'fee paid in advance to a lawyer' },
+    { prompt: '"Legal counsel" refers to ___.', options: ['advice or representation by a lawyer', 'a court\'s written decision', 'a jury\'s recommendation'], correctAnswer: 'advice or representation by a lawyer' },
+    { prompt: 'When a lawyer "advises" a client, they ___.', options: ['explain the legal situation and options', 'decide the outcome of the case', 'file the lawsuit independently'], correctAnswer: 'explain the legal situation and options' },
+  ],
+  'B1-5': [
+    { prompt: '"Strict liability" holds a defendant responsible ___.', options: ['regardless of intent or fault', 'only if they intended harm', 'when proven negligent'], correctAnswer: 'regardless of intent or fault' },
+    { prompt: 'A "duty of care" is a legal obligation to ___.', options: ['avoid causing harm to others', 'appear in court when summoned', 'pay compensatory damages'], correctAnswer: 'avoid causing harm to others' },
+    { prompt: '"Proximate cause" means the harm was ___.', options: ['a foreseeable result of the defendant\'s conduct', 'unrelated to the defendant\'s conduct', 'caused only by the plaintiff'], correctAnswer: 'a foreseeable result of the defendant\'s conduct' },
+    { prompt: '"Contributory negligence" means the plaintiff also ___.', options: ['contributed to their own harm', 'failed to appear in court', 'breached a contract'], correctAnswer: 'contributed to their own harm' },
+    { prompt: '"Vicarious liability" means being responsible for ___.', options: ['another person\'s actions', 'one\'s own mistakes only', 'a contractual breach'], correctAnswer: 'another person\'s actions' },
+  ],
+  'B1-6': [
+    { prompt: 'A "settlement agreement" is legally ___.', options: ['binding on both parties', 'optional for either party', 'subject to a jury decision'], correctAnswer: 'binding on both parties' },
+    { prompt: '"Without prejudice" communications in settlement talks ___.', options: ['cannot be used as evidence in court', 'are fully admissible at trial', 'must be filed with the court'], correctAnswer: 'cannot be used as evidence in court' },
+    { prompt: 'A "confidentiality clause" prevents parties from ___.', options: ['disclosing the settlement terms publicly', 'appealing the decision', 'renegotiating the agreement'], correctAnswer: 'disclosing the settlement terms publicly' },
+    { prompt: 'In a settlement, the defendant typically ___.', options: ['pays compensation to avoid trial', 'admits guilt publicly', 'receives a reduced sentence'], correctAnswer: 'pays compensation to avoid trial' },
+    { prompt: 'Settlements are often preferred because they ___.', options: ['save time and cost compared to trial', 'always result in lower payments', 'require no agreement from both sides'], correctAnswer: 'save time and cost compared to trial' },
+  ],
+  'B1-7': [
+    { prompt: 'When a court "remands" a case, it ___.', options: ['sends it back to the lower court', 'dismisses it entirely', 'orders a new sentence'], correctAnswer: 'sends it back to the lower court' },
+    { prompt: '"Judicial review" allows courts to ___.', options: ['examine the legality of government actions', 'retry criminal cases', 'select new judges'], correctAnswer: 'examine the legality of government actions' },
+    { prompt: '"Precedent" means courts should ___.', options: ['follow decisions from similar previous cases', 'create new rules in each case', 'disregard older rulings'], correctAnswer: 'follow decisions from similar previous cases' },
+    { prompt: 'A "writ of certiorari" is a request for ___.', options: ['a higher court to review a case', 'a retrial', 'a sentence reduction'], correctAnswer: 'a higher court to review a case' },
+    { prompt: '"Stare decisis" is the principle that courts should ___.', options: ['follow established precedent', 'create new law in each case', 'defer only to the legislature'], correctAnswer: 'follow established precedent' },
+  ],
+  'B1-8': [
+    { prompt: 'A lawyer must always act in their client\'s ___.', options: ['best interest', 'personal preference', 'financial benefit only'], correctAnswer: 'best interest' },
+    { prompt: '"Informed consent" means the client ___.', options: ['understands and agrees to the legal strategy', 'signs any document presented', 'waives all rights'], correctAnswer: 'understands and agrees to the legal strategy' },
+    { prompt: '"Conflict of interest" occurs when a lawyer\'s interests ___.', options: ['interfere with fair representation of a client', 'help the client win the case', 'align with the judge\'s position'], correctAnswer: 'interfere with fair representation of a client' },
+    { prompt: 'A lawyer\'s "fiduciary duty" means they must act ___.', options: ['in the client\'s best interest with loyalty', 'according to their own professional judgment', 'based on the judge\'s instructions'], correctAnswer: 'in the client\'s best interest with loyalty' },
+    { prompt: '"Pro bono" legal work is ___.', options: ['done without charge for those in need', 'provided only in criminal cases', 'funded entirely by the government'], correctAnswer: 'done without charge for those in need' },
+  ],
+  'B1-9': [
+    { prompt: '"Discovery" is the pre-trial process where parties ___.', options: ['exchange relevant information and evidence', 'select the jury', 'present closing arguments'], correctAnswer: 'exchange relevant information and evidence' },
+    { prompt: 'A "deposition" is ___.', options: ['sworn testimony taken outside court', 'a written legal brief', 'a court order'], correctAnswer: 'sworn testimony taken outside court' },
+    { prompt: '"Interrogatories" are ___.', options: ['written questions answered under oath', 'oral arguments before a judge', 'instructions to the jury'], correctAnswer: 'written questions answered under oath' },
+    { prompt: '"Statute of limitations" sets a ___.', options: ['deadline for filing a lawsuit', 'minimum sentence for a crime', 'standard of proof in civil cases'], correctAnswer: 'deadline for filing a lawsuit' },
+    { prompt: 'A "counterclaim" is filed by the ___.', options: ['defendant against the plaintiff', 'plaintiff against the defendant', 'court against both parties'], correctAnswer: 'defendant against the plaintiff' },
+  ],
+  'B1-10': [
+    { prompt: '"Injunctive relief" is a court order that ___.', options: ['requires or prohibits a specific action', 'awards money damages', 'sentences a defendant to prison'], correctAnswer: 'requires or prohibits a specific action' },
+    { prompt: 'An "amicus curiae" brief is filed by ___.', options: ['an interested non-party offering information', 'the defendant\'s lawyer', 'the prosecuting attorney'], correctAnswer: 'an interested non-party offering information' },
+    { prompt: '"Res judicata" means a matter that ___.', options: ['has been decided and cannot be relitigated', 'is pending before the court', 'lacks sufficient evidence'], correctAnswer: 'has been decided and cannot be relitigated' },
+    { prompt: '"Subpoena duces tecum" orders a party to ___.', options: ['produce specific documents or evidence', 'appear to testify only', 'pay a court-imposed fine'], correctAnswer: 'produce specific documents or evidence' },
+    { prompt: '"Locus standi" refers to a party\'s ___.', options: ['right to bring a case before a court', 'place of legal residence', 'court-appointed legal representative'], correctAnswer: 'right to bring a case before a court' },
+  ],
+
+  // ── B2 ──────────────────────────────────────────────────────────────────
+  'B2-1': [
+    { prompt: 'A contract is "enforceable" when it meets all ___.', options: ['legal requirements for validity', 'social standards', 'industry norms'], correctAnswer: 'legal requirements for validity' },
+    { prompt: '"Consideration" in contract law refers to ___.', options: ['something of value exchanged between parties', 'the signatures on the contract', 'the date the contract was signed'], correctAnswer: 'something of value exchanged between parties' },
+    { prompt: 'A "breach of contract" occurs when a party ___.', options: ['fails to fulfill its contractual obligations', 'signs the contract under duress', 'disagrees with a term after signing'], correctAnswer: 'fails to fulfill its contractual obligations' },
+    { prompt: '"Specific performance" requires the breaching party to ___.', options: ['fulfill the contract terms exactly', 'pay monetary damages instead', 'renegotiate the agreement'], correctAnswer: 'fulfill the contract terms exactly' },
+    { prompt: 'A contract signed under "duress" is generally ___.', options: ['voidable by the coerced party', 'automatically void ab initio', 'fully enforceable by both parties'], correctAnswer: 'voidable by the coerced party' },
+  ],
+  'B2-2': [
+    { prompt: 'Evidence is "admissible" when the court ___.', options: ['legally allows it to be considered', 'excludes it from the case', 'presents it in closing argument'], correctAnswer: 'legally allows it to be considered' },
+    { prompt: '"Hearsay" is generally inadmissible because it is ___.', options: ['an out-of-court statement offered to prove a fact', 'a direct witness account', 'expert scientific testimony'], correctAnswer: 'an out-of-court statement offered to prove a fact' },
+    { prompt: '"Expert testimony" is given by a witness who ___.', options: ['has specialized knowledge relevant to the case', 'was present at the scene', 'is called only by the prosecution'], correctAnswer: 'has specialized knowledge relevant to the case' },
+    { prompt: 'The "exclusionary rule" prevents ___.', options: ['illegally obtained evidence from being used in court', 'witnesses from testifying voluntarily', 'judges from dismissing cases early'], correctAnswer: 'illegally obtained evidence from being used in court' },
+    { prompt: 'The "chain of custody" ensures evidence ___.', options: ['has been properly handled and documented', 'was witnessed by both parties', 'was obtained with a warrant'], correctAnswer: 'has been properly handled and documented' },
+  ],
+  'B2-3': [
+    { prompt: 'An agreement is "void" when it ___.', options: ['has no legal effect from the beginning', 'can be cancelled by one party', 'requires court approval to cancel'], correctAnswer: 'has no legal effect from the beginning' },
+    { prompt: 'A "voidable" contract can be ___.', options: ['cancelled by the disadvantaged party', 'declared invalid by the court only', 'enforced by either party despite the defect'], correctAnswer: 'cancelled by the disadvantaged party' },
+    { prompt: '"Mutual assent" requires that both parties ___.', options: ['genuinely agree to the contract terms', 'have independent legal representation', 'sign in front of a notary'], correctAnswer: 'genuinely agree to the contract terms' },
+    { prompt: '"Privity of contract" means only ___.', options: ['parties to the contract can enforce it', 'courts can interpret its terms', 'the plaintiff may sue for breach'], correctAnswer: 'parties to the contract can enforce it' },
+    { prompt: 'A contract lacking "consideration" is generally ___.', options: ['unenforceable', 'voidable at will', 'valid but informal'], correctAnswer: 'unenforceable' },
+  ],
+  'B2-4': [
+    { prompt: 'The "burden of proof" in civil cases is typically ___.', options: ['preponderance of the evidence', 'beyond a reasonable doubt', 'clear and convincing evidence'], correctAnswer: 'preponderance of the evidence' },
+    { prompt: '"Prima facie" evidence is evidence that ___.', options: ['is sufficient to establish a fact unless rebutted', 'has been proven beyond all doubt', 'was obtained by law enforcement'], correctAnswer: 'is sufficient to establish a fact unless rebutted' },
+    { prompt: 'A claim is "dismissed" when it ___.', options: ['lacks sufficient legal basis or evidence', 'is settled before trial', 'is referred to a higher court'], correctAnswer: 'lacks sufficient legal basis or evidence' },
+    { prompt: '"Standing" means the party has ___.', options: ['the legal right to bring the claim in court', 'sufficient evidence to win the case', 'the support of the presiding court'], correctAnswer: 'the legal right to bring the claim in court' },
+    { prompt: 'A claim may be "time-barred" if ___.', options: ['the statute of limitations has expired', 'the evidence is insufficient', 'the parties settled out of court'], correctAnswer: 'the statute of limitations has expired' },
+  ],
+  'B2-5': [
+    { prompt: 'Under the contra proferentem rule, an ambiguous term is interpreted ___.', options: ['against the party who drafted it', 'always in favor of the drafter', 'by declaring the whole contract void'], correctAnswer: 'against the party who drafted it' },
+    { prompt: 'The "plain meaning rule" requires courts to ___.', options: ['interpret words by their ordinary meaning', 'consider only the parties\' subjective intentions', 'rewrite unclear terms'], correctAnswer: 'interpret words by their ordinary meaning' },
+    { prompt: 'An "implied term" is one that ___.', options: ['is not stated but assumed to be part of the contract', 'is explicitly written in the agreement', 'was added as an amendment after signing'], correctAnswer: 'is not stated but assumed to be part of the contract' },
+    { prompt: 'A "liquidated damages" clause specifies ___.', options: ['the amount of damages payable in case of breach', 'who can terminate the contract', 'when performance obligations arise'], correctAnswer: 'the amount of damages payable in case of breach' },
+    { prompt: '"Force majeure" clauses excuse performance when ___.', options: ['extraordinary events make performance impossible', 'costs increase significantly', 'one party changes its business plans'], correctAnswer: 'extraordinary events make performance impossible' },
+  ],
+  'B2-6': [
+    { prompt: '"Corroborating evidence" is evidence that ___.', options: ['supports and strengthens other evidence', 'contradicts the main evidence', 'was excluded by the court'], correctAnswer: 'supports and strengthens other evidence' },
+    { prompt: 'A witness\'s "credibility" refers to ___.', options: ['how believable and reliable their testimony is', 'their legal qualifications to testify', 'their relationship to the parties'], correctAnswer: 'how believable and reliable their testimony is' },
+    { prompt: '"Documentary evidence" includes ___.', options: ['written records, contracts, and reports', 'physical objects presented in court', 'oral witness statements only'], correctAnswer: 'written records, contracts, and reports' },
+    { prompt: 'Evidence is "material" if it ___.', options: ['is relevant and could affect the outcome', 'supports only the prosecution\'s case', 'was obtained through legal means'], correctAnswer: 'is relevant and could affect the outcome' },
+    { prompt: '"Real evidence" consists of ___.', options: ['physical objects presented in court', 'written statements and affidavits', 'expert opinions and reports'], correctAnswer: 'physical objects presented in court' },
+  ],
+  'B2-7': [
+    { prompt: '"Whereas" clauses in contracts typically ___.', options: ['provide background and context', 'state the main obligations', 'define the breach remedy'], correctAnswer: 'provide background and context' },
+    { prompt: '"Hereinafter" is used to introduce ___.', options: ['a shortened name for something previously defined', 'a new party to the contract', 'an amendment to the agreement'], correctAnswer: 'a shortened name for something previously defined' },
+    { prompt: 'A "representation" in a contract is a ___.', options: ['statement of fact made to induce the other party to contract', 'promise to perform in the future', 'condition precedent to performance'], correctAnswer: 'statement of fact made to induce the other party to contract' },
+    { prompt: '"Warranties" in contracts are ___.', options: ['promises that certain facts are true', 'conditions for early termination', 'dispute resolution procedures'], correctAnswer: 'promises that certain facts are true' },
+    { prompt: 'A legal statement should always be ___.', options: ['clear, precise, and unambiguous', 'informal and conversational', 'as brief as possible regardless of completeness'], correctAnswer: 'clear, precise, and unambiguous' },
+  ],
+  'B2-8': [
+    { prompt: 'A claim for "negligence" requires proving ___.', options: ['duty, breach, causation, and damages', 'intent, knowledge, and harm', 'consent, duress, and consideration'], correctAnswer: 'duty, breach, causation, and damages' },
+    { prompt: '"Consequential damages" are damages that ___.', options: ['flow from the breach and were foreseeable', 'are a fixed contractual penalty', 'equal exactly the contract price'], correctAnswer: 'flow from the breach and were foreseeable' },
+    { prompt: 'An "indemnification clause" requires one party to ___.', options: ['protect the other party from specified losses', 'share profits equally', 'submit to arbitration for all disputes'], correctAnswer: 'protect the other party from specified losses' },
+    { prompt: 'A contract is "void for uncertainty" when its terms are ___.', options: ['too vague to be enforced', 'subject to reasonable interpretation', 'conditional on future events'], correctAnswer: 'too vague to be enforced' },
+    { prompt: 'An "exclusion clause" limits or excludes ___.', options: ['a party\'s liability for certain losses', 'the court\'s jurisdiction to hear the case', 'the other party\'s right to assign the contract'], correctAnswer: 'a party\'s liability for certain losses' },
+  ],
+  'B2-9': [
+    { prompt: '"Novation" occurs when a new contract ___.', options: ['replaces an existing one with different parties or terms', 'is added as a simple amendment', 'is declared void by the court'], correctAnswer: 'replaces an existing one with different parties or terms' },
+    { prompt: 'An "assignment" of a contract allows one party to ___.', options: ['transfer their rights to a third party', 'renegotiate the terms unilaterally', 'terminate the agreement without penalty'], correctAnswer: 'transfer their rights to a third party' },
+    { prompt: '"Rescission" of a contract means ___.', options: ['both parties are released from all obligations', 'one party must continue to perform', 'damages are automatically awarded'], correctAnswer: 'both parties are released from all obligations' },
+    { prompt: 'A "condition precedent" is an event that must occur ___.', options: ['before a party\'s obligation to perform arises', 'after performance is fully complete', 'during the dispute resolution process'], correctAnswer: 'before a party\'s obligation to perform arises' },
+    { prompt: 'A "penalty clause" that greatly exceeds actual loss may be held ___.', options: ['unenforceable as a penalty', 'valid as a commercial deterrent', 'subject to mandatory renegotiation'], correctAnswer: 'unenforceable as a penalty' },
+  ],
+  'B2-10': [
+    { prompt: '"Quantum meruit" allows a party to claim ___.', options: ['payment for services rendered without a formal contract', 'full contractual damages', 'punitive damages'], correctAnswer: 'payment for services rendered without a formal contract' },
+    { prompt: '"Promissory estoppel" prevents a party from ___.', options: ['going back on a promise that another relied on to their detriment', 'enforcing a written contractual term', 'filing a counterclaim after trial'], correctAnswer: 'going back on a promise that another relied on to their detriment' },
+    { prompt: '"Subrogation" gives an insurer the right to ___.', options: ['pursue claims against a third party in the insured\'s place', 'cancel the insurance policy', 'limit coverage retroactively'], correctAnswer: 'pursue claims against a third party in the insured\'s place' },
+    { prompt: 'A "waiver" of a right means the party ___.', options: ['voluntarily relinquishes that right', 'temporarily suspends the right', 'assigns the right to another party'], correctAnswer: 'voluntarily relinquishes that right' },
+    { prompt: '"Unjust enrichment" occurs when one party ___.', options: ['benefits at the expense of another without legal justification', 'fails to perform a contractual obligation', 'receives less than the agreed compensation'], correctAnswer: 'benefits at the expense of another without legal justification' },
+  ],
+
+  // ── C1 ──────────────────────────────────────────────────────────────────
+  'C1-1': [
+    { prompt: '"Notwithstanding" any contrary provision, the clause ___.', options: ['remains effective regardless', 'can be overridden by the parties', 'is subject to judicial review'], correctAnswer: 'remains effective regardless' },
+    { prompt: '"Inter alia" is a Latin phrase meaning ___.', options: ['among other things', 'in good faith', 'without limitation'], correctAnswer: 'among other things' },
+    { prompt: '"Pursuant to" a statute means ___.', options: ['in accordance with', 'despite the provisions of', 'subject to the interpretation of'], correctAnswer: 'in accordance with' },
+    { prompt: '"Ipso facto" means ___.', options: ['by the fact itself', 'according to established law', 'as a result of mutual agreement'], correctAnswer: 'by the fact itself' },
+    { prompt: '"Whereas" in a legal document introduces ___.', options: ['recitals or background facts', 'operative obligations', 'definitions of key terms'], correctAnswer: 'recitals or background facts' },
+  ],
+  'C1-2': [
+    { prompt: 'A contract is "binding" upon the parties when ___.', options: ['all legal requirements for formation are satisfied', 'both parties sign before a notary', 'a court formally approves it'], correctAnswer: 'all legal requirements for formation are satisfied' },
+    { prompt: '"Good faith" in contract performance requires parties to ___.', options: ['act honestly and fairly in fulfilling obligations', 'disclose all confidential business information', 'renegotiate when circumstances change materially'], correctAnswer: 'act honestly and fairly in fulfilling obligations' },
+    { prompt: 'A "non-disclosure agreement" creates a legal obligation to ___.', options: ['keep confidential information secret', 'perform a specific act by a deadline', 'pay a fixed sum on demand'], correctAnswer: 'keep confidential information secret' },
+    { prompt: 'A "covenant not to compete" restricts a party from ___.', options: ['engaging in similar business activities for a defined period', 'entering into new contracts with third parties', 'employing former colleagues of the other party'], correctAnswer: 'engaging in similar business activities for a defined period' },
+    { prompt: 'An "indemnity clause" protects one party against ___.', options: ['losses or liabilities arising from specified events', 'all future claims regardless of cause', 'breaches by third parties only'], correctAnswer: 'losses or liabilities arising from specified events' },
+  ],
+  'C1-3': [
+    { prompt: '"Ratio decidendi" refers to ___.', options: ['the legal reasoning that forms the binding part of a judgment', 'the background facts of a case', 'the dissenting judge\'s opinion'], correctAnswer: 'the legal reasoning that forms the binding part of a judgment' },
+    { prompt: '"Obiter dicta" are statements in a judgment that ___.', options: ['are not binding but may be persuasive', 'form the core of the binding decision', 'must be followed by all lower courts'], correctAnswer: 'are not binding but may be persuasive' },
+    { prompt: 'A court "distinguishes" a precedent when it ___.', options: ['finds the facts too different to apply it', 'agrees with and applies the previous decision', 'formally overrules the earlier case'], correctAnswer: 'finds the facts too different to apply it' },
+    { prompt: 'When a higher court "overrules" a decision, it ___.', options: ['declares the previous decision wrong and sets new precedent', 'sends the case back for retrial', 'confirms the lower court\'s judgment'], correctAnswer: 'declares the previous decision wrong and sets new precedent' },
+    { prompt: '"Stare decisis" is the principle requiring courts to ___.', options: ['follow established precedent from higher courts', 'create new legal principles in every case', 'refer all novel issues to the legislature'], correctAnswer: 'follow established precedent from higher courts' },
+  ],
+  'C1-4': [
+    { prompt: 'A "material adverse change" clause allows a party to ___.', options: ['exit a transaction if fundamental circumstances change significantly', 'renegotiate any term at their discretion', 'claim damages automatically upon any change'], correctAnswer: 'exit a transaction if fundamental circumstances change significantly' },
+    { prompt: '"Representations and warranties" serve to ___.', options: ['allocate risk by ensuring accuracy of stated facts', 'define the scope of performance obligations', 'establish mandatory dispute resolution procedures'], correctAnswer: 'allocate risk by ensuring accuracy of stated facts' },
+    { prompt: '"Dilution" of equity refers to ___.', options: ['a reduction in existing shareholders\' ownership percentage', 'an increase in the market value of shares', 'the transfer of voting control to new management'], correctAnswer: 'a reduction in existing shareholders\' ownership percentage' },
+    { prompt: 'A "drag-along" right in corporate agreements requires ___.', options: ['minority shareholders to sell their shares alongside the majority', 'all shareholders to approve major transactions unanimously', 'minority shareholders to receive a premium on their shares'], correctAnswer: 'minority shareholders to sell their shares alongside the majority' },
+    { prompt: '"Tag-along" rights allow minority shareholders to ___.', options: ['join a majority sale on the same terms', 'block a majority shareholder\'s sale', 'convert their shares at a fixed price'], correctAnswer: 'join a majority sale on the same terms' },
+  ],
+  'C1-5': [
+    { prompt: '"To the extent that" introduces ___.', options: ['a conditional qualification on a statement', 'an absolute prohibition', 'a definition of key terms'], correctAnswer: 'a conditional qualification on a statement' },
+    { prompt: '"Subject to" indicates that something is ___.', options: ['conditional on or limited by another provision', 'overridden by the following clause', 'applicable without any restriction'], correctAnswer: 'conditional on or limited by another provision' },
+    { prompt: '"Without prejudice to" means ___.', options: ['without affecting existing rights or claims', 'in addition to all prior agreements', 'except as provided in the preceding clause'], correctAnswer: 'without affecting existing rights or claims' },
+    { prompt: '"Save as" in legal drafting introduces ___.', options: ['an exception to the preceding rule', 'a definition of a legal term', 'the main operative obligation'], correctAnswer: 'an exception to the preceding rule' },
+    { prompt: '"In witness whereof" is used to ___.', options: ['introduce the signature block of a formal document', 'recite the background of an agreement', 'define the parties\' main obligations'], correctAnswer: 'introduce the signature block of a formal document' },
+  ],
+  'C1-6': [
+    { prompt: '"Shall" in a contract creates ___.', options: ['a mandatory obligation', 'a discretionary right', 'a conditional duty'], correctAnswer: 'a mandatory obligation' },
+    { prompt: '"May" in a legal document creates ___.', options: ['a discretionary right or permission', 'a mandatory obligation', 'a prohibited action'], correctAnswer: 'a discretionary right or permission' },
+    { prompt: '"Time is of the essence" means ___.', options: ['contractual deadlines are strictly binding and breach allows termination', 'time limits are approximate guidelines', 'late performance is acceptable with prior notice'], correctAnswer: 'contractual deadlines are strictly binding and breach allows termination' },
+    { prompt: '"Best efforts" requires a party to ___.', options: ['take all reasonable steps to achieve the objective', 'guarantee the agreed result absolutely', 'use only currently available resources'], correctAnswer: 'take all reasonable steps to achieve the objective' },
+    { prompt: 'A "covenant" in a contract is a ___.', options: ['binding promise or obligation', 'discretionary permission', 'procedural deadline'], correctAnswer: 'binding promise or obligation' },
+  ],
+  'C1-7': [
+    { prompt: 'An argument based on "equity" appeals to ___.', options: ['fairness and justice beyond strict legal rules', 'the literal wording of the applicable statute', 'established common law precedent only'], correctAnswer: 'fairness and justice beyond strict legal rules' },
+    { prompt: 'The "proportionality principle" requires that remedies should ___.', options: ['be proportionate to the harm caused', 'always reflect the full contract price', 'include a punitive element'], correctAnswer: 'be proportionate to the harm caused' },
+    { prompt: '"Legitimate expectation" argues that a party ___.', options: ['reasonably expected a benefit based on prior conduct or representations', 'had an enforceable contractual right to that benefit', 'was guaranteed a specific outcome by statute'], correctAnswer: 'reasonably expected a benefit based on prior conduct or representations' },
+    { prompt: 'A court may refuse to enforce a contract that is ___.', options: ['contrary to public policy', 'difficult for one party to perform', 'more commercially advantageous to one side'], correctAnswer: 'contrary to public policy' },
+    { prompt: '"Unconscionability" renders a contract unenforceable when it is ___.', options: ['so unfair and one-sided as to shock the conscience', 'merely more favorable to one party', 'signed under normal commercial pressure'], correctAnswer: 'so unfair and one-sided as to shock the conscience' },
+  ],
+  'C1-8': [
+    { prompt: 'When analyzing a clause, you must consider its effect ___.', options: ['in the context of the contract as a whole', 'in complete isolation from other terms', 'only according to its plain dictionary meaning'], correctAnswer: 'in the context of the contract as a whole' },
+    { prompt: '"Severability" means that if one clause is invalid, ___.', options: ['the rest of the contract remains in force', 'the entire contract is automatically void', 'the parties must renegotiate the whole agreement'], correctAnswer: 'the rest of the contract remains in force' },
+    { prompt: 'A "sunset clause" causes a provision to ___.', options: ['expire automatically after a specified period', 'take effect immediately upon signing', 'apply retroactively from a defined date'], correctAnswer: 'expire automatically after a specified period' },
+    { prompt: 'An "entire agreement" clause means ___.', options: ['the written contract supersedes all prior negotiations and understandings', 'parties may still rely on prior oral agreements', 'earlier drafts of the contract remain partially valid'], correctAnswer: 'the written contract supersedes all prior negotiations and understandings' },
+    { prompt: 'A "savings clause" preserves ___.', options: ['the validity of the rest of the contract if one part is unenforceable', 'all original terms unchanged after any amendment', 'the parties\' rights to renegotiate at any time'], correctAnswer: 'the validity of the rest of the contract if one part is unenforceable' },
+  ],
+  'C1-9': [
+    { prompt: '"Ultra vires" actions are those that ___.', options: ['exceed the legal powers of an entity', 'are taken in good faith but cause harm', 'comply with all applicable regulatory requirements'], correctAnswer: 'exceed the legal powers of an entity' },
+    { prompt: '"Mens rea" refers to ___.', options: ['the criminal intent or mental state required for an offense', 'the physical act constituting the crime', 'the evidence required to prove a crime'], correctAnswer: 'the criminal intent or mental state required for an offense' },
+    { prompt: 'A "consent order" is an agreement between parties that ___.', options: ['is recorded and enforced as a court order', 'is binding only on the plaintiff', 'must be reviewed by the court annually'], correctAnswer: 'is recorded and enforced as a court order' },
+    { prompt: 'A "fiduciary" relationship imposes ___.', options: ['a duty of utmost good faith and loyalty', 'only the obligations set out in the contract', 'a duty to disclose all business information'], correctAnswer: 'a duty of utmost good faith and loyalty' },
+    { prompt: '"Actus reus" refers to ___.', options: ['the physical act constituting the offense', 'the mental element of a crime', 'the evidence presented by the prosecution'], correctAnswer: 'the physical act constituting the offense' },
+  ],
+  'C1-10': [
+    { prompt: '"Ejusdem generis" is a rule of interpretation meaning ___.', options: ['general words are limited by the specific examples preceding them', 'all terms are interpreted as broadly as possible', 'contracts must be read as a unified whole'], correctAnswer: 'general words are limited by the specific examples preceding them' },
+    { prompt: '"Noscitur a sociis" means a word is interpreted by ___.', options: ['the company it keeps — its surrounding words', 'its plain dictionary definition alone', 'the drafter\'s stated intention'], correctAnswer: 'the company it keeps — its surrounding words' },
+    { prompt: '"Expressio unius est exclusio alterius" means ___.', options: ['the express mention of one thing excludes others', 'all related items are implicitly included', 'ambiguous terms are resolved in favor of the debtor'], correctAnswer: 'the express mention of one thing excludes others' },
+    { prompt: 'The "contra proferentem" rule resolves ambiguity ___.', options: ['against the party who drafted the ambiguous term', 'in favor of the commercially stronger party', 'by reference to industry custom and practice'], correctAnswer: 'against the party who drafted the ambiguous term' },
+    { prompt: '"De minimis non curat lex" means the law ___.', options: ['does not concern itself with trivial matters', 'treats all breaches equally regardless of size', 'requires strict compliance in every case'], correctAnswer: 'does not concern itself with trivial matters' },
   ],
 }
 
