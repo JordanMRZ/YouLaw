@@ -22,6 +22,9 @@ import { createLevel19 } from './levels/level19'
 import { createLevel20 } from './levels/level20'
 import { createLevel21 } from './levels/level21'
 import { createLevel22 } from './levels/level22'
+import { createLevel23 } from './levels/level23'
+import { createLevel24 } from './levels/level24'
+import { createLevel25 } from './levels/level25'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -73,6 +76,9 @@ const legacyCatalog = [
   { id: 20, name: 'Emergency Maintenance', subtitle: 'Stay cautious of the winds from the fans and know how to respond.', theme: 'Vocabulary, Grammar, Fans, Listening', hubLabel: 'INDUSTRIAL ZONE', world: 'industrial' as const },
   { id: 21, name: 'Neon Staircase', subtitle: 'Shiny colors', theme: 'grammar, vocabulary', hubLabel: 'NEON CITY', world: 'neon' as const },
   { id: 22, name: 'Skyscraper', subtitle: 'Keep going up.', theme: 'grammar, vocabulary', hubLabel: 'NEON CITY', world: 'neon' as const },
+  { id: 23, name: 'Central Zone', subtitle: 'The center of the city.', theme: 'Personaliza este tema', hubLabel: 'NEON CITY', world: 'neon' as const },
+  { id: 24, name: 'Main Highway', subtitle: 'The main road of the city.', theme: 'Personaliza este tema', hubLabel: 'NEON CITY', world: 'neon' as const },
+  { id: 25, name: 'Under Construction', subtitle: 'Zone under construction, a lot of cliffs.', theme: 'Personaliza este tema', hubLabel: 'NEON CITY', world: 'neon' as const }
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -115,11 +121,15 @@ const factories: Record<number, () => LevelDef> = {
   19: createLevel19,
   20: createLevel20,
   21: createLevel21,
+  22: createLevel22,
+  23: createLevel23,
+  24: createLevel24,
+  25: createLevel25,
 }
 
 // Los niveles personalizados de prueba quedan definidos explícitamente en factory map.
 // Desde 15 en adelante, el resto usa la plantilla generada automáticamente.
-for (let id = 25; id <= LEVEL_COUNT; id += 1) {
+for (let id = 30; id <= LEVEL_COUNT; id += 1) {
   const world = worldForLevel(id)
   const localLevel = localLevelForId(id)
   factories[id] = () => createTemplateLevel(id, world, localLevel)
