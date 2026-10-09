@@ -144,7 +144,7 @@ const factories: Record<number, () => LevelDef> = {
 
 // Los niveles personalizados de prueba quedan definidos explícitamente en factory map.
 // Desde 15 en adelante, el resto usa la plantilla generada automáticamente.
-for (let id = 30; id <= LEVEL_COUNT; id += 1) {
+for (let id = 40; id <= LEVEL_COUNT; id += 1) {
   const world = worldForLevel(id)
   const localLevel = localLevelForId(id)
   factories[id] = () => createTemplateLevel(id, world, localLevel)
