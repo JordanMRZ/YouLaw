@@ -25,6 +25,11 @@ import { createLevel22 } from './levels/level22'
 import { createLevel23 } from './levels/level23'
 import { createLevel24 } from './levels/level24'
 import { createLevel25 } from './levels/level25'
+import { createLevel26 } from './levels/level26'
+import { createLevel27 } from './levels/level27'
+import { createLevel28 } from './levels/level28'
+import { createLevel29 } from './levels/level29'
+import { createLevel30 } from './levels/level30'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -78,7 +83,12 @@ const legacyCatalog = [
   { id: 22, name: 'Skyscraper', subtitle: 'Keep going up.', theme: 'grammar, vocabulary', hubLabel: 'NEON CITY', world: 'neon' as const },
   { id: 23, name: 'Central Zone', subtitle: 'The center of the city.', theme: 'Personaliza este tema', hubLabel: 'NEON CITY', world: 'neon' as const },
   { id: 24, name: 'Main Highway', subtitle: 'The main road of the city.', theme: 'Personaliza este tema', hubLabel: 'NEON CITY', world: 'neon' as const },
-  { id: 25, name: 'Under Construction', subtitle: 'Zone under construction, a lot of cliffs.', theme: 'Personaliza este tema', hubLabel: 'NEON CITY', world: 'neon' as const }
+  { id: 25, name: 'Under Construction', subtitle: 'Zone under construction, a lot of cliffs.', theme: 'Personaliza este tema', hubLabel: 'NEON CITY', world: 'neon' as const },
+  { id: 26, name: 'Climbing Session', subtitle: 'Climb the mountain.', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
+  { id: 27, name: 'Elevated area', subtitle: 'More high platforms.', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
+  { id: 28, name: 'High Altitude', subtitle: 'You\'re so high now, keep going!', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
+  { id: 29, name: 'Multiple choices', subtitle: 'Multiple paths to choose.', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
+  { id: 30, name: 'The Peak', subtitle: 'Finally, you\'re close to the top! Keep going!', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -125,6 +135,11 @@ const factories: Record<number, () => LevelDef> = {
   23: createLevel23,
   24: createLevel24,
   25: createLevel25,
+  26: createLevel26,
+  27: createLevel27,
+  28: createLevel28,
+  29: createLevel29,
+  30: createLevel30,
 }
 
 // Los niveles personalizados de prueba quedan definidos explícitamente en factory map.
