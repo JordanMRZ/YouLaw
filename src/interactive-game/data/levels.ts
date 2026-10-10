@@ -30,6 +30,11 @@ import { createLevel27 } from './levels/level27'
 import { createLevel28 } from './levels/level28'
 import { createLevel29 } from './levels/level29'
 import { createLevel30 } from './levels/level30'
+import { createLevel31 } from './levels/level31'
+import { createLevel32 } from './levels/level32'
+import { createLevel33 } from './levels/level33'
+import { createLevel34 } from './levels/level34'
+import { createLevel35 } from './levels/level35'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -89,6 +94,11 @@ const legacyCatalog = [
   { id: 28, name: 'High Altitude', subtitle: 'You\'re so high now, keep going!', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
   { id: 29, name: 'Multiple choices', subtitle: 'Multiple paths to choose.', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
   { id: 30, name: 'The Peak', subtitle: 'Finally, you\'re close to the top! Keep going!', theme: 'Personaliza este tema', hubLabel: 'MOUNTAIN RIDGE', world: 'mountain' as const },
+  { id: 31, name: 'Beautifull Sky', subtitle: 'Complete the challenges while you are in the sky', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
+  { id: 32, name: 'Sky Factory', subtitle: 'Mechanisms floating in the sky!.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
+  { id: 33, name: 'Strong Winds', subtitle: 'Always beware of fans.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
+  { id: 34, name: 'Solid or not?', subtitle: 'Watch out for the vanishing platforms.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
+  { id: 35, name: 'Rainbow Road', subtitle: 'Yes, this is a Mario Kart reference.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const }
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -140,6 +150,11 @@ const factories: Record<number, () => LevelDef> = {
   28: createLevel28,
   29: createLevel29,
   30: createLevel30,
+  31: createLevel31,
+  32: createLevel32,
+  33: createLevel33,
+  34: createLevel34,
+  35: createLevel35,
 }
 
 // Los niveles personalizados de prueba quedan definidos explícitamente en factory map.

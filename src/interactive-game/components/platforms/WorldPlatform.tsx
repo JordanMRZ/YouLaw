@@ -113,7 +113,7 @@ export function WorldPlatform({ def, accent }: { def: PlatformDef; accent: strin
       {!isRecovery && (
         <mesh position={[0, h * 0.52, 0]} receiveShadow>
           <boxGeometry args={[w * 0.96, 0.06, d * 0.96]} />
-          <meshLambertMaterial color="#ffffff" />
+          <meshLambertMaterial color={kind === 'bounce' ? '#26b7f0' : kind === 'vanishing' ? '#ff8a8a' : '#ffffff'} />
         </mesh>
       )}
 
