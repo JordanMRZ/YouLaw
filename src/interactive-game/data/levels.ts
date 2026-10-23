@@ -35,6 +35,12 @@ import { createLevel32 } from './levels/level32'
 import { createLevel33 } from './levels/level33'
 import { createLevel34 } from './levels/level34'
 import { createLevel35 } from './levels/level35'
+import { createLevel36 } from './levels/level36'
+import { createLevel37 } from './levels/level37'
+import { createLevel38 } from './levels/level38'
+import { createLevel39 } from './levels/level39'
+import { createLevel40 } from './levels/level40'
+import { createLevel41 } from './levels/level41'
 import { createTemplateLevel } from './levels/templateLevel'
 
 export const LEVEL_COUNT = 50
@@ -98,7 +104,13 @@ const legacyCatalog = [
   { id: 32, name: 'Sky Factory', subtitle: 'Mechanisms floating in the sky!.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
   { id: 33, name: 'Strong Winds', subtitle: 'Always beware of fans.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
   { id: 34, name: 'Solid or not?', subtitle: 'Watch out for the vanishing platforms.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
-  { id: 35, name: 'Rainbow Road', subtitle: 'Yes, this is a Mario Kart reference.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const }
+  { id: 35, name: 'Rainbow Road', subtitle: 'Yes, this is a Mario Kart reference.', theme: 'Personaliza este tema', hubLabel: 'SKY ISLANDS', world: 'sky' as const },
+  { id: 36, name: 'Minor inconveniences', subtitle: 'Plantilla editable de layout.', theme: 'Personaliza este tema', hubLabel: 'CHAOS FACTORY', world: 'chaos' as const },
+  { id: 37, name: 'Dangerous Path', subtitle: 'Any mistake can be fatal.', theme: 'Personaliza este tema', hubLabel: 'CHAOS FACTORY', world: 'chaos' as const },
+  { id: 38, name: 'Mechanical Crisis', subtitle: 'A level with rotating platforms and obstacles.', theme: 'Personaliza este tema', hubLabel: 'CHAOS FACTORY', world: 'chaos' as const },
+  { id: 39, name: 'Comfort', subtitle: 'Peace before chaos', theme: 'Personaliza este tema', hubLabel: 'CHAOS FACTORY', world: 'chaos' as const },
+  { id: 40, name: 'Ultimate Chaos', subtitle: 'Plantilla editable de layout.', theme: 'Personaliza este tema', hubLabel: 'CHAOS FACTORY', world: 'chaos' as const },
+  { id: 41, name: 'Path to class', subtitle: 'Plantilla editable de layout.', theme: 'Personaliza este tema', hubLabel: 'INTERNATIONAL SCHOOL', world: 'international' as const },
 ]
 
 export const levelCatalog = Array.from({ length: LEVEL_COUNT }, (_, index) => {
@@ -155,11 +167,17 @@ const factories: Record<number, () => LevelDef> = {
   33: createLevel33,
   34: createLevel34,
   35: createLevel35,
+  36: createLevel36,
+  37: createLevel37,
+  38: createLevel38,
+  39: createLevel39,
+  40: createLevel40,
+  41: createLevel41,
 }
 
 // Los niveles personalizados de prueba quedan definidos explícitamente en factory map.
 // Desde 15 en adelante, el resto usa la plantilla generada automáticamente.
-for (let id = 40; id <= LEVEL_COUNT; id += 1) {
+for (let id = 50; id <= LEVEL_COUNT; id += 1) {
   const world = worldForLevel(id)
   const localLevel = localLevelForId(id)
   factories[id] = () => createTemplateLevel(id, world, localLevel)
